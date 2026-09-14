@@ -1,0 +1,55 @@
+name: Wrong verdict
+description: The judge kept, removed or rewrote a comment it should not have
+labels: [verdict]
+body:
+  - type: markdown
+    attributes:
+      value: These reports become the cases the judge instructions are tuned against. The `log` option records the comment, the code and the verdict for you.
+  - type: textarea
+    id: comment
+    attributes:
+      label: Comment the agent wrote
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Code around it
+      description: A few lines above and below, as the edit wrote them.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: What the judge did
+      options:
+        - Kept it
+        - Removed it
+        - Rewrote it
+        - Rejected the edit
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What ended up in the file, and the judge's reason
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should have done, and why
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Judge model
+      placeholder: anthropic/claude-haiku-4-5
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Plugin and opencode versions
+      placeholder: 0.1.0 / 1.18.30

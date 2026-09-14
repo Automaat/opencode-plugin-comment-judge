@@ -1,0 +1,45 @@
+name: Bug
+description: The plugin broke an edit, hung, crashed or wrote something it should not have
+labels: [bug]
+body:
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The prompt, the file involved, and the tool the agent used if you know it.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Lines from the `log` file or opencode's log under the `comment-judge` service. Remove anything private.
+      render: text
+  - type: input
+    id: versions
+    attributes:
+      label: Plugin and opencode versions
+      placeholder: 0.1.0 / 1.18.30
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Judge model
+      placeholder: anthropic/claude-haiku-4-5
+  - type: input
+    id: os
+    attributes:
+      label: Operating system

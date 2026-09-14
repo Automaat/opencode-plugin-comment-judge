@@ -1,6 +1,6 @@
 {
   "name": "opencode-plugin-comment-judge",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "opencode plugin that has a model judge every comment an agent writes, and removes or rewrites the ones that do not earn their place",
   "license": "MIT",
   "author": "Marcin Skalski (https://github.com/Automaat)",

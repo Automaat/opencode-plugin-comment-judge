@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "The toolchain pinned in mise.toml is what CI runs, so keep it current in one PR.",
+      "matchManagers": ["mise"],
+      "groupName": "toolchain"
+    },
+    {
+      "description": "Action digests are pinned by SHA; group them so one PR covers the workflows.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
+    },
+    {
+      "description": "opencode's plugin types decide what this package compiles against, so they are reviewed on their own.",
+      "matchPackageNames": ["@opencode-ai/plugin"],
+      "groupName": "opencode plugin api"
+    }
+  ]
+}

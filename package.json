@@ -1,0 +1,61 @@
+{
+  "name": "opencode-plugin-comment-judge",
+  "version": "0.0.0",
+  "description": "opencode plugin that has a model judge every comment an agent writes, and removes or rewrites the ones that do not earn their place",
+  "license": "MIT",
+  "author": "Marcin Skalski (https://github.com/Automaat)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "opencode": ">=1.18.0"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "ai",
+    "llm",
+    "coding-agent",
+    "code-comments",
+    "code-review"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Automaat/opencode-plugin-comment-judge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Automaat/opencode-plugin-comment-judge/issues"
+  },
+  "homepage": "https://github.com/Automaat/opencode-plugin-comment-judge#readme",
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.18.31",
+    "@types/node": "^24.13.4",
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p .",
+    "test": "node --experimental-strip-types --test --test-force-exit test/*.test.ts",
+    "prepublishOnly": "npm run build"
+  }
+}

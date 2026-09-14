@@ -1,0 +1,38 @@
+[tools]
+node = "24.21.0"
+oxlint = "1.79.0"
+markdownlint-cli2 = "0.23.2"
+actionlint = "1.7.12"
+zizmor = "1.30.1"
+
+[tasks.install]
+description = "Install npm dependencies from the lockfile"
+run = "npm ci --ignore-scripts --no-audit --no-fund"
+
+[tasks.build]
+description = "Compile to dist/ with type declarations"
+run = "npx tsc -p tsconfig.build.json"
+
+[tasks.typecheck]
+description = "Typecheck against opencode's Plugin type"
+run = "npx tsc -p ."
+
+[tasks."lint:js"]
+description = "Lint with oxlint, warnings denied"
+run = "oxlint --deny-warnings --report-unused-disable-directives"
+
+[tasks."lint:md"]
+description = "Lint markdown for fences that never close"
+run = "markdownlint-cli2"
+
+[tasks."lint:actions"]
+description = "Lint the workflows and audit them for supply-chain issues"
+run = ["actionlint", "zizmor --offline --min-severity medium .github/workflows"]
+
+[tasks.test]
+description = "Run the test suite"
+run = "node --experimental-strip-types --test --test-force-exit test/*.test.ts"
+
+[tasks.check]
+description = "Run every gate CI runs"
+depends = ["typecheck", "lint:js", "lint:md", "lint:actions", "test", "build"]

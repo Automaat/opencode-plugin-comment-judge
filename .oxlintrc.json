@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "unicorn", "oxc", "import", "node", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error",
+    "pedantic": "error"
+  },
+  "env": {
+    "node": true,
+    "es2024": true
+  },
+  "ignorePatterns": ["node_modules", "dist"],
+  "rules": {
+    "eslint/require-unicode-regexp": "off",
+    "eslint/max-lines": "off",
+    "eslint/max-lines-per-function": "off",
+    "eslint/no-inline-comments": "off",
+    "eslint/no-await-in-loop": "off",
+    "eslint/require-await": "off",
+    "eslint/no-negated-condition": "off",
+    "unicorn/no-negated-condition": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "oxc/no-map-spread": "off",
+    "unicorn/no-useless-undefined": ["error", { "checkArguments": false }],
+    "eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }],
+    "eslint/no-empty": ["error", { "allowEmptyCatch": true }],
+    "eslint/eqeqeq": ["error", "always", { "null": "ignore" }],
+    "eslint/no-eval": "error",
+    "eslint/no-implied-eval": "error",
+    "eslint/no-new-func": "error",
+    "eslint/no-param-reassign": "error",
+    "eslint/no-return-assign": "error",
+    "eslint/no-throw-literal": "error",
+    "eslint/prefer-promise-reject-errors": "error",
+    "eslint/no-var": "error",
+    "eslint/prefer-const": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/throw-new-error": "error",
+    "promise/catch-or-return": "error",
+    "import/no-cycle": "error",
+    "import/no-self-import": "error"
+  },
+  "overrides": [
+    {
+      "files": ["test/**"],
+      "rules": {
+        "eslint/no-magic-numbers": "off"
+      }
+    }
+  ]
+}

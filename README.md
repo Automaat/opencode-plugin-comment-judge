@@ -1,5 +1,7 @@
 # opencode-plugin-comment-judge
 
+[![npm version](https://img.shields.io/npm/v/opencode-plugin-comment-judge)](https://www.npmjs.com/package/opencode-plugin-comment-judge) [![npm provenance](https://img.shields.io/badge/provenance-SLSA_v1-blue?logo=npm)](https://www.npmjs.com/package/opencode-plugin-comment-judge) [![license](https://img.shields.io/npm/l/opencode-plugin-comment-judge)](LICENSE)
+
 An [opencode](https://opencode.ai) plugin that puts a model between your agent and the comments it writes. Every comment an edit adds is judged: the ones that restate the code or tell the story of the change are removed or rewritten before the file is touched, and the ones that explain something the code cannot say stay.
 
 > **Status:** pre-1.0, verified against opencode 1.18.30. Verdicts, messages and options may change between minor versions.
@@ -62,6 +64,8 @@ Add the plugin to `opencode.json`. opencode installs npm plugins itself when it 
 
 Diagnostics always go to opencode's own log under the `comment-judge` service.
 
+To read a `log` file as numbers, run `mise run stats -- path/to/log.jsonl` (add `--json` for machine output) from a checkout of this repository: verdict counts and rates, rejections, unjudged edits, judge latency, cost and the most common reasons. The script is not part of the npm package.
+
 ## What the judge keeps, removes and rewrites
 
 The full instructions are in [`src/judge.ts`](src/judge.ts). In short, a comment stays only if it will still be true and useful to someone reading the file in a year who knows nothing about this change.
@@ -97,6 +101,8 @@ COMMENT_JUDGE_MODEL=anthropic/claude-haiku-4-5 scripts/try.sh ~/tmp/comment-judg
 ```
 
 The script creates a scratch project that loads `src/index.ts` from this checkout and writes the judge log into the project. It prints the commands to run opencode there, including an isolated variant that keeps your providers but drops your global `AGENTS.md`, instructions and `plugin/` directory, so the agent writes comments the way it would on a machine without them. It needs `jq`.
+
+`opencode run` started without a terminal, from a script or another agent, hangs until stdin is redirected: append `</dev/null`.
 
 ## Contributing
 

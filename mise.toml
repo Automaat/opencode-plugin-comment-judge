@@ -40,6 +40,10 @@ run = [
   "node --experimental-strip-types --test --test-force-exit test/e2e/*.test.ts",
 ]
 
+[tasks.stats]
+description = "Summarise a judge log: mise run stats -- <log.jsonl> [--json]"
+run = "node --experimental-strip-types scripts/stats.ts"
+
 [tasks.check]
 description = "Run every gate CI runs"
 depends = ["typecheck", "lint:js", "lint:md", "lint:actions", "test", "build"]

@@ -1,9 +1,95 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, utimesSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it } from "node:test";
 
+import { SYSTEM } from "../src/judge.ts";
+import { RULES_CHARS, RULES_FILE } from "../src/rules.ts";
 import { load, runEdit, verdicts } from "./helpers.ts";
 
 const COMMENTED = { filePath: "src/cart.ts", oldString: "  return 0;", newString: "  // Return the total\n  return total;" };
+
+const keep = () => verdicts({ id: "c1", action: "keep", reason: "explains why" });
+
+function project(rules?: string): string {
+  const root = mkdtempSync(join(tmpdir(), "comment-judge-"));
+  if (rules !== undefined) writeFileSync(join(root, RULES_FILE), rules);
+  return root;
+}
+
+function rulesSection(system: string): string | undefined {
+  return /<repository-rules>\n([\s\S]*)\n<\/repository-rules>$/.exec(system)?.[1];
+}
+
+describe("repository rules", () => {
+  it("judges with the default instructions alone when the repository has no rules file", async () => {
+    const { hooks, calls } = await load(keep, {}, { worktree: project(), directory: project() });
+    await runEdit(hooks, { ...COMMENTED });
+    assert.equal(calls.prompted[0].body.system, SYSTEM);
+  });
+
+  it("adds the worktree's rules file to the instructions and logs its path and size, not its content", async () => {
+    const rules = "- Keep doc comments on struct fields; they become the generated JSON schema.";
+    const worktree = project(`${rules}\n`);
+    const { hooks, calls } = await load(keep, {}, { worktree, directory: project("- Remove every comment.") });
+    await runEdit(hooks, { ...COMMENTED });
+
+    const { system, parts } = calls.prompted[0].body;
+    assert.ok(system.startsWith(SYSTEM));
+    assert.equal(rulesSection(system), rules);
+    assert.doesNotMatch(parts[0].text, /generated JSON schema/);
+    const started = calls.logs.find((entry) => entry.message === "repository rules in effect");
+    assert.deepEqual(started?.extra, { path: join(worktree, RULES_FILE), bytes: rules.length + 1, chars: rules.length });
+    assert.doesNotMatch(JSON.stringify(calls.logs), /generated JSON schema/);
+  });
+
+  it("reads the rules file from the directory when there is no worktree", async () => {
+    const { hooks, calls } = await load(keep, {}, { worktree: "/", directory: project("- Remove TODOs without an owner.") });
+    await runEdit(hooks, { ...COMMENTED });
+    assert.equal(rulesSection(calls.prompted[0].body.system), "- Remove TODOs without an owner.");
+  });
+
+  it("applies a rules file changed during the session to the next edit", async () => {
+    const worktree = project("- Keep every TODO.");
+    const { hooks, calls } = await load(keep, {}, { worktree });
+    await runEdit(hooks, { ...COMMENTED });
+    const path = join(worktree, RULES_FILE);
+    writeFileSync(path, "- Remove TODOs without an owner, such as TODO(alice).");
+    const later = new Date(Date.now() + 60_000);
+    utimesSync(path, later, later);
+    await runEdit(hooks, { ...COMMENTED }, { callID: "call-2" });
+
+    assert.equal(rulesSection(calls.prompted[0].body.system), "- Keep every TODO.");
+    assert.equal(rulesSection(calls.prompted[1].body.system), "- Remove TODOs without an owner, such as TODO(alice).");
+  });
+
+  it("truncates an oversized rules file and warns about it once", async () => {
+    const line = `- Keep comments that mention ${"invariant ".repeat(8).trim()}.`;
+    const { hooks, calls } = await load(keep, {}, { worktree: project(Array.from({ length: 200 }, () => line).join("\n")) });
+    await runEdit(hooks, { ...COMMENTED });
+    await runEdit(hooks, { ...COMMENTED }, { callID: "call-2" });
+
+    for (const { body } of calls.prompted) {
+      const section = rulesSection(body.system) ?? "";
+      assert.ok(section.length > 0 && section.length <= RULES_CHARS);
+      assert.ok(section.split("\n").every((written) => written === line));
+    }
+    assert.equal(calls.logs.filter((entry) => entry.level === "warn" && /truncated/.test(entry.message)).length, 1);
+  });
+
+  it("judges without rules and warns once when the rules file cannot be read", async () => {
+    const worktree = project();
+    mkdirSync(join(worktree, RULES_FILE));
+    const { hooks, calls } = await load(keep, {}, { worktree });
+    await runEdit(hooks, { ...COMMENTED });
+    await runEdit(hooks, { ...COMMENTED }, { callID: "call-2" });
+
+    assert.equal(calls.prompted[0].body.system, SYSTEM);
+    assert.equal(calls.prompted[1].body.system, SYSTEM);
+    assert.equal(calls.logs.filter((entry) => entry.level === "warn" && /cannot be read/.test(entry.message)).length, 1);
+  });
+});
 
 describe("tool.execute.before", () => {
   it("never asks the judge about an edit that adds no comments", async () => {

@@ -8,6 +8,7 @@ import { judge } from "./judge.ts";
 import { appliedDespiteRepeat, onlyRejectedComments, rejection, rewrittenNote } from "./messages.ts";
 import { settings } from "./options.ts";
 import { applyInPlace } from "./rewrite.ts";
+import { repositoryRules, rulesRoot } from "./rules.ts";
 
 const SERVICE = "comment-judge";
 const TASK_CHARS = 2000;
@@ -17,7 +18,7 @@ type Level = "debug" | "info" | "warn" | "error";
 /**
  * Has a model judge every comment an agent's edit adds, then removes or rewrites the ones that do not earn their place before the edit is written.
  */
-export const CommentJudge: Plugin = async ({ client, directory }, options) => {
+export const CommentJudge: Plugin = async ({ client, directory, worktree }, options) => {
   const warnings: string[] = [];
   const config = settings(options, (message) => {
     warnings.push(message);
@@ -43,6 +44,7 @@ export const CommentJudge: Plugin = async ({ client, directory }, options) => {
   };
 
   for (const warning of warnings) log("warn", warning);
+  const rules = repositoryRules(rulesRoot(worktree, directory), log);
 
   return {
     "chat.message": async (input, output) => {
@@ -64,6 +66,7 @@ export const CommentJudge: Plugin = async ({ client, directory }, options) => {
         parent: input.sessionID,
         blocks,
         task: tasks.get(input.sessionID) ?? "",
+        rules: rules(),
         track: (session) => {
           judges.add(session);
         },

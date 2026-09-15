@@ -17,4 +17,6 @@ This plugin changes the arguments of file edits before opencode writes them, bas
 - Code, comments or prompts sent anywhere other than the judge model, opencode's log, and the `log` file when one is configured.
 - A judge session that gains tools, runs tool calls, or outlives the edit it was created for.
 
+The repository rules in `.comment-judge.md` are part of the judge's instructions, so anyone who can commit to the repository can steer verdicts: keep comments the defaults would remove, or remove ones they would keep. That is intended. The rules reach the plugin through the same verdicts as everything else, so they can still only ever produce comment text; rules that make the plugin write anything else fall under the findings above.
+
 A verdict you disagree with is not a vulnerability; use the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) issue template.

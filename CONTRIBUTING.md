@@ -32,7 +32,7 @@ To try a change inside opencode, use [`scripts/try.sh`](scripts/try.sh).
 
 [Conventional Commits](https://www.conventionalcommits.org/) with a required scope, a title of 50 characters or fewer, imperative, with no issue reference. Sign and sign off: `git commit -s -S`.
 
-Scopes inside `src/` name the module: `judge`, `comments`, `changes`, `rewrite`, `messages`, `options`, `plugin`. Outside it: `ci(actions)`, `ci(release)`, `build(build)`, `docs(readme)`, `test(<module>)`, `chore(deps)`.
+Scopes inside `src/` name the module: `judge`, `comments`, `changes`, `rewrite`, `messages`, `options`, `rules`, `plugin`. Outside it: `ci(actions)`, `ci(release)`, `build(build)`, `docs(readme)`, `test(<module>)`, `chore(deps)`.
 
 ## Pull requests
 

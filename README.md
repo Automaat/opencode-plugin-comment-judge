@@ -73,9 +73,25 @@ The full instructions are in [`src/judge.ts`](src/judge.ts). In short, a comment
 | Public API contracts: errors, units, side effects | Comments on self-explanatory code | A useful point buried in several sentences |
 | TODO or FIXME with a concrete follow-up, license headers, links to constraints still in force | | |
 
+## Repository rules
+
+A repository can tell the judge what its maintainers want kept or removed in `.comment-judge.md` at the root of the git worktree, or of the directory opencode runs in when there is no worktree. The file is plain text or Markdown, written as instructions to the judge:
+
+```markdown
+- Keep doc comments on fields of types in `api/`: they become descriptions in the generated OpenAPI schema, even when they restate the field name.
+- Remove TODO and FIXME comments that do not name an owner, as in `TODO(alice): ...`.
+- Rewrite comments in any language other than English into English.
+```
+
+The rules take precedence over the defaults above, except that directives tools read are always kept. They are added to the judge's instructions, apart from the comments being judged.
+
+- The file is read when opencode starts, and read again on the next judged edit after it changes, so edits to it apply without a restart.
+- It is capped at 4000 characters, cut at the last line break before the limit, and a warning is logged when it is cut.
+- A missing or unreadable file means the defaults alone. opencode's log records which file is in effect and its size, never its content.
+
 ## Cost and latency
 
-One model call per edit that adds comments, and none otherwise. Each call carries the comments, a few lines of code around each, the session's latest prompt (capped at 2000 characters) and the judge instructions. With a fast small model, verdicts took 2 to 9 seconds in testing, and an occasional call ran past 30. Pick the fastest model whose judgement you trust, and set `timeoutMs` to what you are willing to wait.
+One model call per edit that adds comments, and none otherwise. Each call carries the comments, a few lines of code around each, the session's latest prompt (capped at 2000 characters), the judge instructions and the repository rules (capped at 4000 characters). With a fast small model, verdicts took 2 to 9 seconds in testing, and an occasional call ran past 30. Pick the fastest model whose judgement you trust, and set `timeoutMs` to what you are willing to wait.
 
 ## Limitations
 

@@ -49,9 +49,9 @@ export function fakeClient(answer: Answer, smallModel = "cheap/fast") {
   return { client, calls };
 }
 
-export async function load(answer: Answer, options: Record<string, unknown> = {}) {
+export async function load(answer: Answer, options: Record<string, unknown> = {}, input: Record<string, unknown> = {}) {
   const { client, calls } = fakeClient(answer);
-  const hooks = (await CommentJudge({ client, directory: process.cwd() } as any, options)) as any;
+  const hooks = (await CommentJudge({ client, directory: process.cwd(), ...input } as any, options)) as any;
   return { hooks, calls };
 }
 

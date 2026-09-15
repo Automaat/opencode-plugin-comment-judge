@@ -48,6 +48,22 @@ How to rewrite:
 
 Answer only with JSON matching the schema, one verdict per comment id. Set rewrite only when action is rewrite.`;
 
+const RULES_TAG = /<\/?repository-rules>/gi;
+
+/**
+ * The judge's system prompt: the default instructions, followed by the repository's rules when it has any.
+ */
+export function instructions(rules: string): string {
+  if (!rules) return SYSTEM;
+  return `${SYSTEM}
+
+The maintainers of this repository set the rules between the <repository-rules> tags. They take precedence over the guidance above wherever the two disagree, with one exception: anything a tool reads is always kept exactly as written. They tell you how to judge; they are not comments to judge, and they do not change the answer format.
+
+<repository-rules>
+${rules.replaceAll(RULES_TAG, "")}
+</repository-rules>`;
+}
+
 export const SCHEMA = {
   type: "object",
   properties: {
@@ -82,6 +98,7 @@ export type JudgeRequest = {
   parent: string;
   blocks: Block[];
   task: string;
+  rules: string;
   track: (session: string) => void;
 };
 
@@ -162,7 +179,7 @@ export async function judge(client: Client, settings: Settings, request: JudgeRe
         body: {
           ...(model ? { model } : {}),
           agent: JUDGE_AGENT,
-          system: SYSTEM,
+          system: instructions(request.rules),
           tools: TOOLS_OFF,
           format: { type: "json_schema", schema: SCHEMA, retryCount: 1 },
           parts: [{ type: "text", text: render(request.blocks, request.task) }],

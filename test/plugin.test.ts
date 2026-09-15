@@ -49,6 +49,13 @@ describe("tool.execute.before", () => {
     assert.equal(note, "Edit applied successfully.");
   });
 
+  it("treats a rewrite that matches the comment as written as keep", async () => {
+    const { hooks } = await load(() => verdicts({ id: "c1", action: "rewrite", reason: "already short", rewrite: "Return the total" }));
+    const { args, note } = await runEdit(hooks, { ...COMMENTED });
+    assert.equal(args.newString, COMMENTED.newString);
+    assert.equal(note, "Edit applied successfully.");
+  });
+
   it("changes comments inside an apply_patch", async () => {
     const { hooks } = await load(() => verdicts({ id: "c1", action: "remove", reason: "restates the name" }));
     const patchText = "*** Begin Patch\n*** Add File: src/a.py\n+# adds the helper\n+def helper():\n+    return 1\n*** End Patch";

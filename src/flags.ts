@@ -11,6 +11,7 @@ export function flagged(blocks: Block[], verdicts: Verdict[]): Flag[] {
       if (!block) return [];
       const flag: Flag = { block, verdict };
       flag.lines = replacement(flag);
+      if (verdict.action === "rewrite" && flag.lines?.join("\n") === block.raw.join("\n")) return [];
       return [flag];
     });
 }

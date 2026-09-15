@@ -63,6 +63,19 @@ describe("tool.execute.before", () => {
     assert.equal(args.patchText, "*** Begin Patch\n*** Add File: src/a.py\n+def helper():\n+    return 1\n*** End Patch");
   });
 
+  it("removes a markup comment from a Markdown edit", async () => {
+    const { hooks } = await load(() => verdicts({ id: "c1", action: "remove", reason: "narrates the change" }));
+    const { args } = await runEdit(hooks, { filePath: "docs/a.md", oldString: "Old text.", newString: "<!--\n  Updated per review.\n-->\nNew text." });
+    assert.equal(args.newString, "New text.");
+  });
+
+  it("rejects removing a docstring that is the whole body of a function", async () => {
+    const { hooks } = await load(() => verdicts({ id: "c1", action: "remove", reason: "restates the name" }));
+    const output = { args: { filePath: "src/a.py", oldString: "def total():\n    pass", newString: 'def total():\n    """Returns the total."""' } };
+    await assert.rejects(hooks["tool.execute.before"]({ tool: "edit", sessionID: "s", callID: "c" }, output), /cannot be changed in place/);
+    assert.equal(output.args.newString, 'def total():\n    """Returns the total."""');
+  });
+
   it("rejects an edit whose verdicts cannot be applied in place, and lets the same comments through once re-sent", async () => {
     const { hooks } = await load(() => verdicts({ id: "c1", action: "rewrite", reason: "too long" }));
     const args = () => ({ filePath: "src/cart.ts", oldString: "const a = 1;", newString: "// a long story\nconst a = 2;" });

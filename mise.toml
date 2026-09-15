@@ -33,6 +33,13 @@ run = ["actionlint", "zizmor --offline --min-severity medium .github/workflows"]
 description = "Run the test suite"
 run = "node --experimental-strip-types --test --test-force-exit test/*.test.ts"
 
+[tasks."test:e2e"]
+description = "Run the plugin inside the pinned opencode against a fake model; needs mise run install first"
+run = [
+  "node node_modules/opencode-ai/postinstall.mjs",
+  "node --experimental-strip-types --test --test-force-exit test/e2e/*.test.ts",
+]
+
 [tasks.stats]
 description = "Summarise a judge log: mise run stats -- <log.jsonl> [--json]"
 run = "node --experimental-strip-types scripts/stats.ts"

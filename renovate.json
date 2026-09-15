@@ -16,8 +16,8 @@
       "groupName": "github actions"
     },
     {
-      "description": "opencode's plugin types decide what this package compiles against, so they are reviewed on their own.",
-      "matchPackageNames": ["@opencode-ai/plugin"],
+      "description": "opencode's plugin types decide what this package compiles against, and the pinned opencode-ai is what the e2e test runs, so they move together and are reviewed on their own.",
+      "matchPackageNames": ["@opencode-ai/plugin", "opencode-ai"],
       "groupName": "opencode plugin api"
     }
   ]

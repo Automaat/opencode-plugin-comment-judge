@@ -62,6 +62,8 @@ Add the plugin to `opencode.json`. opencode installs npm plugins itself when it 
 
 Diagnostics always go to opencode's own log under the `comment-judge` service.
 
+To read a `log` file as numbers, run `mise run stats -- path/to/log.jsonl` (add `--json` for machine output) from a checkout of this repository: verdict counts and rates, rejections, unjudged edits, judge latency, cost and the most common reasons. The script is not part of the npm package.
+
 ## What the judge keeps, removes and rewrites
 
 The full instructions are in [`src/judge.ts`](src/judge.ts). In short, a comment stays only if it will still be true and useful to someone reading the file in a year who knows nothing about this change.

@@ -15,7 +15,7 @@ Coding agents comment as if they were narrating a screen share: `// Loop over th
 1. On every `edit`, `write`, `multiedit` and `apply_patch` call, it finds the comment lines the edit adds. Comments already in the file are left alone, and an edit that adds none never reaches the model.
 2. It asks a model for a verdict on each comment in a short-lived child session: **keep**, **remove** or **rewrite**. The model sees the code around each comment and the session's latest prompt, so it can tell a lasting reason from the history of the fix.
 3. It writes the verdicts into the tool call before it runs, in the file's own comment syntax, and adds a note to the tool result so the agent's next edit still matches the file.
-4. When a verdict cannot be applied in place (a rewrite without text, or lines cut out of a `/* */` comment), it rejects the edit with the suggestions and the agent re-issues it. The same comments sent a second time go through, with the suggestions attached.
+4. When a verdict cannot be applied in place (a rewrite without text, lines cut out of a `/* */` comment, or removing a docstring that is the only statement of its function or class), it rejects the edit with the suggestions and the agent re-issues it. The same comments sent a second time go through, with the suggestions attached.
 5. If the judge errors or runs past `timeoutMs`, the edit is written unjudged and a warning is logged.
 
 ### Example
@@ -83,7 +83,10 @@ One model call per edit that adds comments, and none otherwise. Each call carrie
 
 ## Limitations
 
-- Comments are found line by line from the file name: `//`, `/* */` and `*` in C-like files; `#` in shell, Python, Ruby, YAML, TOML, Nix, Terraform, Dockerfiles and Makefiles; `--` in SQL, Lua and Haskell; and trailing comments after code. Python docstrings, JSX comments and `<!-- -->` are not seen.
+- Comments are found from the file name: `//`, `/* */` and `*` in C-like files; `#` in shell, Python, Ruby, YAML, TOML, Nix, Terraform, Dockerfiles and Makefiles; `--` in SQL, Lua and Haskell; and trailing comments after code. On top of those: docstrings of Python modules, classes and functions; `{/* */}` in JSX, TSX and MDX; and `<!-- -->` in HTML, Markdown, MDX, XML, Vue and Svelte. Markdown and MDX are read for those comments only, and not inside code fences.
+- Docstrings, `{/* */}` and `<!-- -->` are seen only when they take whole lines, open and close inside the edit, and have nothing but whitespace after them on the closing line. One after code on the same line, such as `<p>text</p> <!-- note -->`, is not seen.
+- A docstring, `{/* */}` or `<!-- -->` that the edit adds or changes is judged, rewritten and removed as a whole, including lines the file already had. A rewrite breaks up `"""`, `*/` and `-->` in the model's text, and every `--` in XML, so it cannot end the comment early.
+- Removing a docstring that is the only statement of its function or class would leave an empty body, so that verdict rejects the edit and the agent decides what goes in its place. The body counts as empty when nothing indented under the definition follows the docstring in the edit, even if the file has more.
 - "Added" means lines in the new text that are not in the old text, counted as a multiset, so a moved comment counts as kept.
 - The judge is prompted as opencode's `build` agent, so it carries that agent's system prompt, and anything that attributes spend by agent sees `build`. Its session also runs other plugins' chat hooks.
 - Verdicts are not deterministic: the same comment can be worded differently on another run.

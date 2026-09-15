@@ -49,8 +49,10 @@ function patchChanges(args: { patchText?: unknown }): Change[] {
         commit: (ops) => {
           for (const op of ops) {
             for (const [offset, patchIndex] of map.slice(op.start, op.start + op.length).entries()) {
-              patch[patchIndex] =
-                offset === 0 && op.lines.length > 0 ? op.lines.map((written) => `+${written}`).join("\n") : null;
+              const replaced = patch[patchIndex] ?? "";
+              const lines = replaced.startsWith("+") ? [] : [`-${replaced.slice(1)}`];
+              if (offset === 0) lines.push(...op.lines.map((written) => `+${written}`));
+              patch[patchIndex] = lines.length > 0 ? lines.join("\n") : null;
             }
           }
           args.patchText = patch.filter((kept) => kept !== null).join("\n");

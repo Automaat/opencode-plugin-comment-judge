@@ -7,6 +7,10 @@ export type Change = {
   commit: (ops: Op[]) => void;
 };
 
+export type Syntax = "docstring" | "jsx" | "markup";
+
+export type Span = { syntax: Syntax; start: number; end: number; opener: string; closer: string; sole: boolean };
+
 export type Block = {
   id: string;
   change: Change;
@@ -15,6 +19,7 @@ export type Block = {
   code: string;
   text: string;
   context: string;
+  span?: Span;
 };
 
 export type Action = "keep" | "remove" | "rewrite";

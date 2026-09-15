@@ -95,6 +95,18 @@ describe("changesOf", () => {
     );
   });
 
+  it("removes context lines an op replaces instead of dropping them from the patch", () => {
+    const args = {
+      patchText: ["*** Begin Patch", "*** Update File: a.py", "@@", " def f():", '     """Old', "+    new line.", '     """', "*** End Patch"].join("\n"),
+    };
+    const [change] = changesOf("apply_patch", args, "/");
+    change?.commit([{ start: 1, length: 3, lines: ['    """Short."""'] }]);
+    assert.equal(
+      args.patchText,
+      ["*** Begin Patch", "*** Update File: a.py", "@@", " def f():", '-    """Old', '+    """Short."""', '-    """', "*** End Patch"].join("\n"),
+    );
+  });
+
   it("ignores tools it does not know and arguments it cannot read", () => {
     assert.deepEqual(changesOf("bash", { command: "ls" }, "/"), []);
     assert.deepEqual(changesOf("edit", undefined, "/"), []);

@@ -19,4 +19,10 @@ This plugin changes the arguments of file edits before opencode writes them, bas
 
 The repository rules in `.comment-judge.md` are part of the judge's instructions, so anyone who can commit to the repository can steer verdicts: keep comments the defaults would remove, or remove ones they would keep. That is intended. The rules reach the plugin through the same verdicts as everything else, so they can still only ever produce comment text; rules that make the plugin write anything else fall under the findings above.
 
+The Claude Code hook, `comment-judge-claude`, sends the same text through `claude -p`: the comments an edit adds, the code around them, the session's latest prompt read from its transcript, and the repository rules. That call runs under the account Claude Code is logged in with, on the model in `COMMENT_JUDGE_MODEL`. The same findings apply to it, and so do these:
+
+- A `claude -p` judge call that gets tools, MCP servers, settings, hooks or plugins, or that loads the hook again and judges its own output.
+- An edit whose `updatedInput` changes anything but comment text, or that skips a permission prompt Claude Code would otherwise show.
+- Notes or rejection records written anywhere but the private `comment-judge-claude-<uid>` directory under the system temp directory, or readable by another user.
+
 A verdict you disagree with is not a vulnerability; use the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) issue template.

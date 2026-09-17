@@ -43,13 +43,13 @@ export function appliedDespiteRepeat(flags: Flag[]): string {
   ].join("\n");
 }
 
-export function rewrittenNote(flags: Flag[]): string {
+export function rewrittenNote(flags: Flag[], field = "oldString"): string {
   const lines = flags.map(({ block, verdict, lines: written }) => {
     const now = written && written.length > 0 ? `now "${oneLine(written.join("\n"))}"` : "removed";
     return `- ${block.change.file}: "${firstLine(block)}" ${now} (${verdict.reason})`;
   });
   return [
-    "comment-judge changed comments in this edit before it was written. The file holds the versions below; match them in any later oldString:",
+    `comment-judge changed comments in this edit before it was written. The file holds the versions below; match them in any later ${field}:`,
     ...lines,
   ].join("\n");
 }

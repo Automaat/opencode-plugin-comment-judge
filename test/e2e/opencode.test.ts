@@ -11,7 +11,7 @@ import { pathToFileURL } from "node:url";
 import { SYSTEM } from "../../src/judge.ts";
 
 const REPO = resolve(import.meta.dirname, "../..");
-const OPENCODE_PACKAGE = join(REPO, "node_modules", "opencode-ai");
+const OPENCODE_PACKAGE = join(import.meta.dirname, "node_modules", "opencode-ai");
 const OPENCODE = join(OPENCODE_PACKAGE, "bin", "opencode.exe");
 const RUN_TIMEOUT_MS = 90_000;
 const TEST_TIMEOUT_MS = 120_000;

@@ -1,0 +1,7 @@
+{
+  "file": "ratelimit/bucket.go",
+  "comment": "// Acquire blocks until a token is available or ctx is done, and then returns ctx.Err().\n// A caller that gives up does not return its place in line.",
+  "context": "// Acquire blocks until a token is available or ctx is done, and then returns ctx.Err().\n// A caller that gives up does not return its place in line.\nfunc (b *Bucket) Acquire(ctx context.Context) error {\n\tselect {\n\tcase <-b.tokens:\n\t\treturn nil\n\tcase <-ctx.Done():\n\t\treturn ctx.Err()\n\t}\n}",
+  "expected": "keep",
+  "why": "Documents the contract of an exported method, including its error."
+}

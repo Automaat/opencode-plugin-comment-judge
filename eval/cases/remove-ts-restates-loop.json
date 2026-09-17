@@ -1,0 +1,8 @@
+{
+  "file": "src/cart/totals.ts",
+  "comment": "// Loop over the items and add up price times quantity",
+  "context": "export function subtotal(cart: Cart): number {\n  let total = 0;\n  // Loop over the items and add up price times quantity\n  for (const item of cart.items) {\n    total += item.price * item.quantity;\n  }\n  return total;\n}",
+  "task": "Add a subtotal function to the cart module.",
+  "expected": "remove",
+  "why": "Restates the next lines."
+}

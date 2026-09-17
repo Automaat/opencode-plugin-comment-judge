@@ -1,0 +1,7 @@
+{
+  "file": "store/postgres.go",
+  "comment": "// return the error",
+  "context": "func (s *Store) Load(ctx context.Context, id string) (*Record, error) {\n\trow := s.db.QueryRowContext(ctx, loadQuery, id)\n\tvar rec Record\n\tif err := row.Scan(&rec.ID, &rec.Body, &rec.UpdatedAt); err != nil {\n\t\treturn nil, err // return the error\n\t}\n\treturn &rec, nil\n}",
+  "expected": "remove",
+  "why": "A trailing comment that restates the statement."
+}

@@ -1,0 +1,7 @@
+{
+  "file": "scheduler/queue.py",
+  "comment": "# Note that we push a counter between the priority and the job, as discussed,\n# because otherwise heapq compares Job objects when priorities tie and raises TypeError.",
+  "context": "class JobQueue:\n    def __init__(self) -> None:\n        self._heap: list[tuple[int, int, Job]] = []\n        self._counter = itertools.count()\n\n    def push(self, job: Job, priority: int) -> None:\n        # Note that we push a counter between the priority and the job, as discussed,\n        # because otherwise heapq compares Job objects when priorities tie and raises TypeError.\n        heapq.heappush(self._heap, (priority, next(self._counter), job))",
+  "expected": "rewrite",
+  "why": "Talks to the reader and the conversation, around a real reason worth keeping."
+}

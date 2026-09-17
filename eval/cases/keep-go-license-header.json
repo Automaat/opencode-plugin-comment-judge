@@ -1,0 +1,7 @@
+{
+  "file": "pkg/tern/queue.go",
+  "comment": "// Copyright 2026 The Tern Authors\n// SPDX-License-Identifier: Apache-2.0",
+  "context": "// Copyright 2026 The Tern Authors\n// SPDX-License-Identifier: Apache-2.0\n\npackage tern\n\nimport \"sync\"\n\ntype Queue[T any] struct {\n\tmu    sync.Mutex\n\titems []T\n}",
+  "expected": "keep",
+  "why": "License headers stay."
+}

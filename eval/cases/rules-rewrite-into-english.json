@@ -1,0 +1,8 @@
+{
+  "file": "billing/signature.py",
+  "comment": "# Kolejność ma znaczenie: podpis liczony jest z treści, więc nagłówek dodajemy dopiero po niej.",
+  "context": "def signed_request(body: bytes, secret: bytes) -> dict[str, str]:\n    headers = {\"Content-Type\": \"application/json\"}\n    # Kolejność ma znaczenie: podpis liczony jest z treści, więc nagłówek dodajemy dopiero po niej.\n    headers[\"X-Signature\"] = hmac.new(secret, body, hashlib.sha256).hexdigest()\n    return headers",
+  "rules": "- Rewrite comments in any language other than English into English.",
+  "expected": "rewrite",
+  "why": "A lasting reason the defaults keep, but the repository rules want it in English."
+}

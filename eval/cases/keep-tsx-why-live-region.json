@@ -1,0 +1,7 @@
+{
+  "file": "src/components/UploadStatus.tsx",
+  "comment": "{/* Stays mounted while empty: screen readers ignore a live region inserted together with its text. */}",
+  "context": "export function UploadStatus({ message }: { message: string }) {\n  return (\n    <section className=\"upload-status\">\n      {/* Stays mounted while empty: screen readers ignore a live region inserted together with its text. */}\n      <div aria-live=\"polite\">{message}</div>\n    </section>\n  );\n}",
+  "expected": "keep",
+  "why": "An accessibility constraint someone would otherwise refactor away."
+}

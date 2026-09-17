@@ -1,0 +1,8 @@
+{
+  "file": "src/cart/cart.ts",
+  "comment": "// Fix for the duplicate line bug: previously adding \"abc-1\" after \"ABC-1\"\n// created a second cart line. SKUs are case-insensitive, so we now match\n// lines on the lowercased SKU instead of the raw string.",
+  "context": "export function addItem(cart: Cart, sku: string, quantity: number): Cart {\n  const key = sku.toLowerCase();\n  // Fix for the duplicate line bug: previously adding \"abc-1\" after \"ABC-1\"\n  // created a second cart line. SKUs are case-insensitive, so we now match\n  // lines on the lowercased SKU instead of the raw string.\n  const existing = cart.lines.find((line) => line.sku.toLowerCase() === key);\n  if (existing) {\n    existing.quantity += quantity;\n    return cart;\n  }\n  cart.lines.push({ sku, quantity });\n  return cart;\n}",
+  "task": "Bug: adding sku \"abc-1\" after \"ABC-1\" gives the cart two lines instead of one. Fix addItem and leave a comment explaining the fix.",
+  "expected": "rewrite",
+  "why": "A bug story around a lasting fact: SKUs match case-insensitively."
+}

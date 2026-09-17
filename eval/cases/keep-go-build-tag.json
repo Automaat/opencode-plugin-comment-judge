@@ -1,0 +1,7 @@
+{
+  "file": "internal/netlink/socket_linux.go",
+  "comment": "//go:build linux",
+  "context": "//go:build linux\n\npackage netlink\n\nimport \"golang.org/x/sys/unix\"\n\nfunc openSocket() (int, error) {\n\treturn unix.Socket(unix.AF_NETLINK, unix.SOCK_RAW, unix.NETLINK_ROUTE)\n}",
+  "expected": "keep",
+  "why": "A build constraint is read by the Go toolchain."
+}

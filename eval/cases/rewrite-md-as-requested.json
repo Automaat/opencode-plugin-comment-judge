@@ -1,0 +1,8 @@
+{
+  "file": "docs/install-windows.md",
+  "comment": "<!-- Updated these steps as requested: PowerShell blocks the install script unless the execution policy allows it for the current process. -->",
+  "context": "## Windows\n\n<!-- Updated these steps as requested: PowerShell blocks the install script unless the execution policy allows it for the current process. -->\n\n1. Open PowerShell.\n2. Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.\n3. Run `./install.ps1`.",
+  "task": "The Windows install steps are missing the execution policy step; users report the script is blocked. Update the docs.",
+  "expected": "rewrite",
+  "why": "Request context around a lasting reason for step 2."
+}

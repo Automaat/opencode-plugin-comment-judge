@@ -1,0 +1,7 @@
+{
+  "file": "src/api/serialize.ts",
+  "comment": "// TODO: drop the legacy \"items\" field after the v1 API sunset on 2027-01-31; Android clients below 4.2 still read it.",
+  "context": "export function serializeOrder(order: Order): OrderPayload {\n  const lines = order.lines.map(serializeLine);\n  return {\n    id: order.id,\n    lines,\n    // TODO: drop the legacy \"items\" field after the v1 API sunset on 2027-01-31; Android clients below 4.2 still read it.\n    items: lines,\n  };\n}",
+  "expected": "keep",
+  "why": "A TODO naming a concrete follow-up and when it applies."
+}

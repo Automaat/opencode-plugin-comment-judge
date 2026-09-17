@@ -1,0 +1,7 @@
+{
+  "file": "cache/key.go",
+  "comment": "// Changed from a map to a sorted slice per review: the order must be stable\n// because the encoded headers are hashed into the cache key.",
+  "context": "func cacheKey(method, path string, headers map[string]string) string {\n\tnames := make([]string, 0, len(headers))\n\tfor name := range headers {\n\t\tnames = append(names, name)\n\t}\n\t// Changed from a map to a sorted slice per review: the order must be stable\n\t// because the encoded headers are hashed into the cache key.\n\tsort.Strings(names)\n\th := sha256.New()\n\tio.WriteString(h, method+\" \"+path)\n\tfor _, name := range names {\n\t\tio.WriteString(h, \"\\n\"+name+\": \"+headers[name])\n\t}\n\treturn hex.EncodeToString(h.Sum(nil))\n}",
+  "expected": "rewrite",
+  "why": "Review history around a lasting reason: header order must be stable for hashing."
+}

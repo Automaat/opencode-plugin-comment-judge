@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
+  "ignorePaths": ["**/node_modules/**"],
   "lockFileMaintenance": {
     "enabled": true
   },
@@ -16,7 +17,7 @@
       "groupName": "github actions"
     },
     {
-      "description": "opencode's plugin types decide what this package compiles against, and the pinned opencode-ai is what the e2e test runs, so they move together and are reviewed on their own.",
+      "description": "opencode's plugin types in package.json decide what this package compiles against, and the pinned opencode-ai in test/e2e/package.json is what the e2e test runs, so they move together and are reviewed on their own.",
       "matchPackageNames": ["@opencode-ai/plugin", "opencode-ai"],
       "groupName": "opencode plugin api"
     }

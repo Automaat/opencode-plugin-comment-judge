@@ -17,7 +17,7 @@ mise run check
 
 Typecheck, oxlint, markdownlint, actionlint with zizmor, the tests and the build. Every CI job runs one of these tasks, so a green local run and a green CI run mean the same thing. While you work, run the narrow one: `mise run test`, `mise run typecheck`, `mise run lint:js`, `mise run lint:md`, `mise run lint:actions` or `mise run build`.
 
-`mise run test:e2e` is kept out of the gate because it needs `mise run install` and takes a few seconds per case. It runs the pinned `opencode-ai` headless in a scratch project with this checkout loaded as a plugin, against a fake model server, and checks that a judge's rewrite reaches the file on disk through `edit` and `apply_patch`. Run it after touching `src/index.ts`, `src/changes.ts` or `src/judge.ts`, and on every opencode bump. CI runs it in its own job.
+`mise run test:e2e` is kept out of the gate because it needs `mise run install` and takes a few seconds per case. It installs the `opencode-ai` pinned in [`test/e2e/package.json`](test/e2e/package.json) into `test/e2e/node_modules`, so `mise run install` and the other CI jobs never download the opencode binary. It runs that opencode headless in a scratch project with this checkout loaded as a plugin, against a fake model server, and checks that a judge's rewrite reaches the file on disk through `edit` and `apply_patch`. Run it after touching `src/index.ts`, `src/changes.ts` or `src/judge.ts`, and on every opencode bump, which moves `opencode-ai` there and `@opencode-ai/plugin` in the root `package.json` together. CI runs it in its own job.
 
 No lint suppressions. If a rule is wrong for a case, raise it in the pull request.
 

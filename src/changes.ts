@@ -14,7 +14,7 @@ function spliced(lines: string[], ops: Op[], eol: string): string {
   return copy.join(eol);
 }
 
-function textChange(file: string, before: string, after: string, write: (text: string) => void): Change {
+export function textChange(file: string, before: string, after: string, write: (text: string) => void): Change {
   const eol = after.includes("\r\n") ? "\r\n" : "\n";
   const lines = after.split(eol);
   return {
@@ -25,7 +25,7 @@ function textChange(file: string, before: string, after: string, write: (text: s
   };
 }
 
-function currentContent(path: string): string {
+export function currentContent(path: string): string {
   try {
     return readFileSync(path, "utf8");
   } catch {

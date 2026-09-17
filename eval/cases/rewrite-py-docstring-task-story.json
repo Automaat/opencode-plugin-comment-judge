@@ -1,0 +1,7 @@
+{
+  "file": "storage/upload.py",
+  "comment": "\"\"\"Upload with retries.\n\nI added this because uploads were failing intermittently in CI. It now retries\nup to 3 times with exponential backoff, since S3 answers 503 SlowDown under load.\n\"\"\"",
+  "context": "def upload_with_retries(client, bucket: str, key: str, body: bytes) -> None:\n    \"\"\"Upload with retries.\n\n    I added this because uploads were failing intermittently in CI. It now retries\n    up to 3 times with exponential backoff, since S3 answers 503 SlowDown under load.\n    \"\"\"\n    for attempt in range(3):\n        try:\n            client.put_object(Bucket=bucket, Key=key, Body=body)\n            return\n        except SlowDown:\n            time.sleep(2**attempt)\n    client.put_object(Bucket=bucket, Key=key, Body=body)",
+  "expected": "rewrite",
+  "why": "A docstring that tells the story of the change around a lasting reason."
+}

@@ -24,17 +24,39 @@ No lint suppressions. If a rule is wrong for a case, raise it in the pull reques
 ## What a change carries
 
 - **A test.** Tests live in [`test/`](test), one file per module. Write the test first and watch it fail.
-- **Evidence for prompt changes.** A change to the judge instructions in [`src/judge.ts`](src/judge.ts) names the verdicts it fixes: link the wrong-verdict issues, or paste the before and after from a `log` file.
+- **Evidence for prompt changes.** A change to the judge instructions in [`src/judge.ts`](src/judge.ts) names the verdicts it fixes, and carries the `mise run eval` table from before and after the change for the models it was tried on. Link the wrong-verdict issues, or paste the before and after from a `log` file.
+- **A case for every wrong verdict.** Each reported wrong verdict becomes a case in [`eval/cases/`](eval/cases), so a later prompt change cannot bring it back unnoticed.
 - **Comments that say why.** Never what. This project in particular has no excuse.
 - **README updates.** If the change makes a claim in the [README](README.md) false, fix it in the same pull request.
 
 To try a change inside opencode, use [`scripts/try.sh`](scripts/try.sh).
 
+## Replaying the eval cases
+
+```sh
+mise run eval -- --model anthropic/claude-haiku-4-5 --model openai/gpt-5-mini
+mise run eval -- --model anthropic/claude-haiku-4-5 --case rewrite-ts-bug-story --runs 5 --json
+```
+
+[`scripts/eval.ts`](scripts/eval.ts) starts `opencode serve` from your `PATH` with your normal opencode config and providers, and sends every case in [`eval/cases/`](eval/cases) through the plugin's own `judge()`, so it exercises the production prompt. For each model it prints agreement with the expected actions, overall and per action, latency p50 and p95, total cost, failures (timeouts and unreadable answers, which count as not agreeing), and every disagreement with the model's reason. `--runs n` repeats each case to show how much verdicts vary between runs. It exits 0 even with disagreements. CI does not run it, because it needs provider credentials; `mise run test` validates every case file.
+
+A case is one JSON file named after it:
+
+| Field | Meaning |
+| --- | --- |
+| `file` | Path with an extension; it picks the comment syntax |
+| `comment` | The comment as written, with its markers; indentation may be left out |
+| `context` | The code around it after the edit, containing the comment |
+| `task` | Optional prompt the agent was given |
+| `rules` | Optional repository rules, as in `.comment-judge.md` |
+| `expected` | `keep`, `remove` or `rewrite` |
+| `why` | One line on why that is the right answer |
+
 ## Commits
 
 [Conventional Commits](https://www.conventionalcommits.org/) with a required scope, a title of 50 characters or fewer, imperative, with no issue reference. Sign and sign off: `git commit -s -S`.
 
-Scopes inside `src/` name the module: `judge`, `comments`, `changes`, `rewrite`, `messages`, `options`, `rules`, `plugin`. Outside it: `ci(actions)`, `ci(release)`, `build(build)`, `docs(readme)`, `test(<module>)`, `chore(deps)`.
+Scopes inside `src/` name the module: `judge`, `comments`, `changes`, `rewrite`, `messages`, `options`, `rules`, `plugin`, `evaluate`, and `claude` for everything under `src/claude/`. Outside it: `ci(actions)`, `ci(release)`, `build(build)`, `docs(readme)`, `test(<module>)`, `chore(deps)`.
 
 ## Pull requests
 

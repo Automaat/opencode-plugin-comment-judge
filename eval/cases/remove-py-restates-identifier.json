@@ -1,0 +1,7 @@
+{
+  "file": "accounts/views.py",
+  "comment": "# Get the user by id",
+  "context": "def deactivate(request, user_id: int):\n    # Get the user by id\n    user = users.get_by_id(user_id)\n    user.active = False\n    user.save(update_fields=[\"active\"])\n    return HttpResponse(status=204)",
+  "expected": "remove",
+  "why": "Repeats what the function name already says."
+}

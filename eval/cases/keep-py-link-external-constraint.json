@@ -1,0 +1,7 @@
+{
+  "file": "reports/excel.py",
+  "comment": "# Excel counts days from 1899-12-30 because it treats 1900 as a leap year: https://learn.microsoft.com/en-us/troubleshoot/microsoft-365-apps/excel/wrongly-assumes-1900-is-leap-year",
+  "context": "from datetime import date, timedelta\n\n# Excel counts days from 1899-12-30 because it treats 1900 as a leap year: https://learn.microsoft.com/en-us/troubleshoot/microsoft-365-apps/excel/wrongly-assumes-1900-is-leap-year\nEXCEL_EPOCH = date(1899, 12, 30)\n\n\ndef from_serial(serial: int) -> date:\n    return EXCEL_EPOCH + timedelta(days=serial)",
+  "expected": "keep",
+  "why": "Explains a surprising epoch and links the external constraint behind it."
+}

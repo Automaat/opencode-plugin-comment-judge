@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/opencode-plugin-comment-judge)](https://www.npmjs.com/package/opencode-plugin-comment-judge) [![npm provenance](https://img.shields.io/badge/provenance-SLSA_v1-blue?logo=npm)](https://www.npmjs.com/package/opencode-plugin-comment-judge) [![license](https://img.shields.io/npm/l/opencode-plugin-comment-judge)](LICENSE)
 
-An [opencode](https://opencode.ai) plugin that puts a model between your agent and the comments it writes. Every comment an edit adds is judged: the ones that restate the code or tell the story of the change are removed or rewritten before the file is touched, and the ones that explain something the code cannot say stay.
+An [opencode](https://opencode.ai) plugin, and a [Claude Code](#claude-code) hook, that puts a model between your agent and the comments it writes. Every comment an edit adds is judged: the ones that restate the code or tell the story of the change are removed or rewritten before the file is touched, and the ones that explain something the code cannot say stay.
 
 > **Status:** pre-1.0. The e2e test runs it inside opencode 1.18.31. Verdicts, messages and options may change between minor versions.
 
@@ -134,9 +134,62 @@ One model call per edit that adds comments, and none otherwise. Each call carrie
 - Verdicts are not deterministic: the same comment can be worded differently on another run.
 - It relies on opencode behaviour that is not a documented contract: structured output through `format`, tool arguments being mutable in `tool.execute.before`, and the `apply_patch` format.
 
+## Claude Code
+
+The same package ships `comment-judge-claude`, a command for Claude Code's `PreToolUse` and `PostToolUse` [hooks](https://code.claude.com/docs/en/hooks). It finds the comments an `Edit`, `Write` or `MultiEdit` call adds, asks `claude -p` on a cheap model for the same verdicts, and returns the rewritten tool input before the file is touched. Its rules, messages and `.comment-judge.md` handling are the opencode plugin's.
+
+Install it once so each edit does not pay for `npx` resolving the package:
+
+```sh
+npm install -g opencode-plugin-comment-judge
+```
+
+Then add the hooks to `.claude/settings.json` in a project, or to `~/.claude/settings.json` for every project:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "comment-judge-claude", "timeout": 60 }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "comment-judge-claude", "timeout": 10 }] }
+    ]
+  }
+}
+```
+
+Without a global install, use `"command": "npx -y -p opencode-plugin-comment-judge comment-judge-claude"` in both places.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `COMMENT_JUDGE_MODEL` | `haiku` | Model alias or full name passed to `claude -p --model` |
+| `COMMENT_JUDGE_TIMEOUT_MS` | `30000` | How long an edit waits for a verdict before it is written unjudged. Keep it below the hook's `timeout`, which is in seconds |
+
+Set them in your shell, or under `env` in the same settings file.
+
+What each hook call does:
+
+- **Every verdict applies in place:** the `PreToolUse` hook returns `updatedInput` with the comments rewritten, and no permission decision, so your permission mode and rules still decide whether the edit runs, and a permission prompt shows the rewritten edit. The `PostToolUse` hook then gives Claude the note about what the file holds as `additionalContext`.
+- **A verdict cannot apply in place, or an `Edit` would be left with only removed comments:** the hook denies the call, and Claude reads the suggestions as the reason. The same comments sent again go through, with the suggestions attached after the tool runs.
+- **The judge fails or times out:** the edit runs as sent, and the warning is shown to you as a `systemMessage`.
+
+The judge runs `claude -p --model haiku --system-prompt <instructions> --output-format json --json-schema <schema> --tools "" --strict-mcp-config --setting-sources "" --safe-mode --disable-slash-commands --no-session-persistence` from the system temp directory, with stdin closed. It has no tools, MCP servers, settings files, hooks, plugins or CLAUDE.md, and saves no session. It runs with `MAX_THINKING_TOKENS=0`, since extended thinking made a verdict take four times as long in testing, and `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`, which skips the extra model request for a session title. It also runs with `COMMENT_JUDGE_ACTIVE=1`, and the hook exits at once when it sees that variable, so the judge can never judge itself.
+
+Limitations on top of the ones above:
+
+- Needs Claude Code 2.1.169 or later, for `--safe-mode`; verified against 2.1.274. On an older version every judge call fails and edits are written unjudged, with the warning.
+- Each judged edit is a `claude -p` call billed to the account Claude Code is logged in with. With `haiku`, a call took about 5 seconds and cost under a cent in testing.
+- The task the judge sees is the latest prompt, read from the session transcript, whose format Claude Code does not document. When it cannot be read, the judge sees no task.
+- Rules are read from `.comment-judge.md` in `$CLAUDE_PROJECT_DIR`, or the hook's working directory when that is unset, on every judged edit.
+- Notes and rejected comments are kept between hook calls in `comment-judge-claude-<uid>` under the system temp directory, one file each, and removed a day after a session last wrote there.
+- `MultiEdit` is not in the current Claude Code tool list; its input is handled for versions that still have it. Edits made through `Bash`, `NotebookEdit` or MCP tools are not judged.
+- If another `PreToolUse` hook also returns `updatedInput` for the same call, only one of them takes effect.
+- Not tested on Windows.
+
 ## Reporting a wrong verdict
 
-Open an issue with the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) template: the comment, the code around it, what the judge did and what it should have done. These reports become the cases the instructions are tuned against.
+Open an issue with the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) template: the comment, the code around it, what the judge did and what it should have done. These reports become cases in [`eval/cases/`](eval/cases), which `mise run eval` replays against real models before the instructions change; see [CONTRIBUTING.md](CONTRIBUTING.md#replaying-the-eval-cases).
 
 ## Trying a working copy
 

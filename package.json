@@ -1,11 +1,14 @@
 {
   "name": "opencode-plugin-comment-judge",
   "version": "0.2.0",
-  "description": "opencode plugin that has a model judge every comment an agent writes, and removes or rewrites the ones that do not earn their place",
+  "description": "opencode plugin and Claude Code hook that has a model judge every comment an agent writes, and removes or rewrites the ones that do not earn their place",
   "license": "MIT",
   "author": "Marcin Skalski (https://github.com/Automaat)",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "comment-judge-claude": "dist/claude.js"
+  },
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -33,6 +36,8 @@
   "keywords": [
     "opencode",
     "opencode-plugin",
+    "claude-code",
+    "claude-code-hooks",
     "ai",
     "llm",
     "coding-agent",

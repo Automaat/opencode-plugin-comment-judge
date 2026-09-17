@@ -3,11 +3,9 @@ import { appendFileSync } from "node:fs";
 
 import { branchJudge } from "./branch.ts";
 import { EDIT_TOOLS, editedBlocks } from "./changes.ts";
-import { fingerprint, flagged } from "./flags.ts";
+import { evaluate } from "./evaluate.ts";
 import { judge } from "./judge.ts";
-import { appliedDespiteRepeat, onlyRejectedComments, rejection, rewrittenNote } from "./messages.ts";
 import { settings } from "./options.ts";
-import { applyInPlace } from "./rewrite.ts";
 import { repositoryRules, rulesRoot } from "./rules.ts";
 
 const SERVICE = "comment-judge";
@@ -93,37 +91,40 @@ export const CommentJudge: Plugin = async ({ client, directory, worktree }, opti
         verdicts: judgement.verdicts,
       });
 
-      const flags = flagged(blocks, judgement.verdicts);
-      if (flags.length === 0) return;
-
-      const inPlace = flags.every(({ lines }) => lines);
-      if (inPlace) {
-        const original = output.args.newString;
-        applyInPlace(flags);
-        if (input.tool !== "edit" || output.args.newString !== output.args.oldString) {
-          log("info", "comments changed in place", {
-            tool: input.tool,
-            changed: flags.map(({ block, verdict, lines }) => ({ id: block.id, action: verdict.action, from: block.raw, to: lines })),
-          });
-          toast(`${flags.length} of ${blocks.length} comment block(s) removed or rewritten`, "info");
-          notes.set(input.callID, rewrittenNote(flags));
-          return;
-        }
-        output.args.newString = original;
-      }
-
       const seen = rejected.get(input.sessionID) ?? new Set<string>();
       rejected.set(input.sessionID, seen);
-      const key = fingerprint(flags);
-      if (seen.has(key)) {
-        log("info", "same comments re-sent after a rejection; edit written as sent", { tool: input.tool });
-        notes.set(input.callID, appliedDespiteRepeat(flags));
+      const original = output.args.newString;
+      const outcome = evaluate(
+        blocks,
+        judgement.verdicts,
+        {
+          unchanged: () => input.tool === "edit" && output.args.newString === output.args.oldString,
+          restore: () => {
+            output.args.newString = original;
+          },
+        },
+        seen,
+      );
+      if (outcome.kind === "kept") return;
+      const { flags } = outcome;
+
+      if (outcome.kind === "rewritten") {
+        log("info", "comments changed in place", {
+          tool: input.tool,
+          changed: flags.map(({ block, verdict, lines }) => ({ id: block.id, action: verdict.action, from: block.raw, to: lines })),
+        });
+        toast(`${flags.length} of ${blocks.length} comment block(s) removed or rewritten`, "info");
+        notes.set(input.callID, outcome.note);
         return;
       }
-      seen.add(key);
+      if (outcome.kind === "repeated") {
+        log("info", "same comments re-sent after a rejection; edit written as sent", { tool: input.tool });
+        notes.set(input.callID, outcome.note);
+        return;
+      }
       log("info", "edit rejected", { tool: input.tool, blocks: flags.map(({ block }) => block.id) });
       toast(`edit rejected: ${flags.length} comment(s) to fix`, "warning");
-      throw new Error(inPlace ? onlyRejectedComments(flags) : rejection(flags));
+      throw new Error(outcome.reason);
     },
 
     "tool.execute.after": async (input, output) => {

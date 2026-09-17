@@ -1,0 +1,7 @@
+{
+  "file": "src/http/retry.ts",
+  "comment": "// Full jitter: clients that failed together would otherwise retry together and overload the service again.",
+  "context": "const MAX_DELAY_MS = 30_000;\n\nexport function retryDelay(attempt: number, baseMs: number): number {\n  const ceiling = Math.min(baseMs * 2 ** attempt, MAX_DELAY_MS);\n  // Full jitter: clients that failed together would otherwise retry together and overload the service again.\n  return Math.random() * ceiling;\n}",
+  "expected": "keep",
+  "why": "Explains why the delay is random, which the code cannot say."
+}

@@ -17,8 +17,8 @@
       "groupName": "github actions"
     },
     {
-      "description": "opencode's plugin types in package.json decide what this package compiles against, and the pinned opencode-ai in test/e2e/package.json is what the e2e test runs, so they move together and are reviewed on their own.",
-      "matchPackageNames": ["@opencode-ai/plugin", "opencode-ai"],
+      "description": "opencode's plugin types in package.json decide what this package compiles against, and the pinned opencode-ai in test/e2e/package.json is what the e2e test runs, so they move together and are reviewed on their own. zod is pinned to the version @opencode-ai/plugin uses, because opencode reads the judge_comments arguments with its own copy of zod.",
+      "matchPackageNames": ["@opencode-ai/plugin", "opencode-ai", "zod"],
       "groupName": "opencode plugin api"
     }
   ]

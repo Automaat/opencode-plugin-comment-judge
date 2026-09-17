@@ -16,6 +16,8 @@ This plugin changes the arguments of file edits before opencode writes them, bas
 - An edit that reaches the file in a form the agent was not told about, or that the judge rejected.
 - Code, comments or prompts sent anywhere other than the judge model, opencode's log, and the `log` file when one is configured.
 - A judge session that gains tools, runs tool calls, or outlives the edit it was created for.
+- A `judge_comments` argument that makes `git` do anything but read: a base or path read as an option, or a command run through a shell.
+- An edit that skips the judge because it writes a `judge_comments` suggestion, when its comment is not exactly one the tool suggested in that session.
 
 The repository rules in `.comment-judge.md` are part of the judge's instructions, so anyone who can commit to the repository can steer verdicts: keep comments the defaults would remove, or remove ones they would keep. That is intended. The rules reach the plugin through the same verdicts as everything else, so they can still only ever produce comment text; rules that make the plugin write anything else fall under the findings above.
 

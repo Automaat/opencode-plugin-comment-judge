@@ -45,7 +45,7 @@ Add the plugin to `opencode.json`, pinned to a version. opencode installs npm pl
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-plugin-comment-judge@0.2.0"],
+  "plugin": ["opencode-plugin-comment-judge@0.3.0"],
   "small_model": "anthropic/claude-haiku-4-5"
 }
 ```
@@ -58,7 +58,7 @@ Add the plugin to `opencode.json`, pinned to a version. opencode installs npm pl
 
 ```json
 {
-  "plugin": [["opencode-plugin-comment-judge@0.2.0", { "model": "anthropic/claude-haiku-4-5", "timeoutMs": 20000 }]]
+  "plugin": [["opencode-plugin-comment-judge@0.3.0", { "model": "anthropic/claude-haiku-4-5", "timeoutMs": 20000 }]]
 }
 ```
 
@@ -86,7 +86,7 @@ rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/packages/opencode-plugin-commen
 
 <!-- x-release-please-start-version -->
 
-A pinned entry such as `"opencode-plugin-comment-judge@0.2.0"` gets a directory of its own, so changing the version installs the new one on the next start, and changing it back rolls back. Pinning is the recommended setup: every machine runs the same version, and an update is a one-line change you choose to make.
+A pinned entry such as `"opencode-plugin-comment-judge@0.3.0"` gets a directory of its own, so changing the version installs the new one on the next start, and changing it back rolls back. Pinning is the recommended setup: every machine runs the same version, and an update is a one-line change you choose to make.
 
 <!-- x-release-please-end -->
 

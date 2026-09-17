@@ -186,6 +186,7 @@ export function addedLines(before: string[], after: string[]): boolean[] {
 export function blocksOf(changes: Change[]): Block[] {
   const blocks: Block[] = [];
   const finish = (block: Block, end: number) => {
+    if (block.change.added && containsRun(block.change.before, block.raw)) return;
     blocks.push({
       ...block,
       id: `c${blocks.length + 1}`,
@@ -194,7 +195,7 @@ export function blocksOf(changes: Change[]): Block[] {
   };
 
   for (const change of changes) {
-    const added = addedLines(change.before, change.after);
+    const added = change.added ?? addedLines(change.before, change.after);
     const spans = new Map(spansOf(change.after, change.file).map((span) => [span.start, span]));
     let open: Block | null = null;
     for (let index = 0; index <= change.after.length; index += 1) {
@@ -208,7 +209,8 @@ export function blocksOf(changes: Change[]): Block[] {
       if (span) {
         const raw = change.after.slice(span.start, span.end);
         const text = raw.map((kept) => kept.trim()).join("\n");
-        if (!containsRun(change.before, raw)) finish({ id: "", change, start: index, raw, code: "", text, context: "", span }, span.end);
+        const touched = !change.added || change.added.slice(span.start, span.end).some(Boolean);
+        if (touched && !containsRun(change.before, raw)) finish({ id: "", change, start: index, raw, code: "", text, context: "", span }, span.end);
         index = span.end - 1;
         continue;
       }

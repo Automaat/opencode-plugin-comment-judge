@@ -4,6 +4,10 @@ export type Change = {
   file: string;
   before: string[];
   after: string[];
+  /**
+   * Which lines of after are new, when known exactly, as from a diff; otherwise lines of after missing from before count as new.
+   */
+  added?: boolean[];
   commit: (ops: Op[]) => void;
 };
 

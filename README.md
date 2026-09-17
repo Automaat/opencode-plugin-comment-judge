@@ -92,6 +92,26 @@ A pinned entry such as `"opencode-plugin-comment-judge@0.2.0"` gets a directory 
 
 What changed in each version is in the [GitHub releases](https://github.com/Automaat/opencode-plugin-comment-judge/releases) and in [CHANGELOG.md](CHANGELOG.md).
 
+## Judging a whole branch
+
+Comments already on a branch, written before the plugin was installed or by people, never went through an edit the plugin saw. Run `/judge-comments` in opencode to have them judged:
+
+```text
+/judge-comments
+/judge-comments origin/release-2.0
+/judge-comments main src/api
+```
+
+The command asks the agent to call the plugin's `judge_comments` tool and then apply what it returns with edits that change only those comment lines. A git ref among the arguments is the base; paths limit the review to those files or directories. The command is not added when your config already defines a command named `judge-comments`.
+
+The tool can also be called on its own, by you or the agent:
+
+- **What is judged:** every comment the diff between the base and the working tree adds, so committed, uncommitted and untracked files all count. Deleted and binary files are skipped, a renamed file is read under its new name, and a comment moved within a file counts as kept. Docstrings, `{/* */}` and `<!-- -->` are read from the whole file, so one the branch only changed a line of is judged as a whole.
+- **Base:** the merge base of `HEAD` with `origin/HEAD`, or with `main`, `master`, `origin/main` or `origin/master` when that does not exist. A `base` argument uses the merge base of `HEAD` with that ref instead.
+- **Calls:** comments go to the judge in batches of 20, up to three calls at a time, each under `timeoutMs` and the repository rules. A batch that fails or times out is listed as not judged, and the rest are still reported.
+- **Answer:** a count of keep, remove and rewrite verdicts, then per file each comment to remove or rewrite with its `path:line`, its first line, the reason, and the lines to delete or the replacement lines in the file's comment syntax and indentation. Kept comments are only counted. The tool does not edit files.
+- **Applying:** an edit that writes a suggested comment exactly as the tool gave it, in the same session, is not judged again. Any other comment in that edit is.
+
 ## What the judge keeps, removes and rewrites
 
 The full instructions are in [`src/judge.ts`](src/judge.ts). In short, a comment stays only if it will still be true and useful to someone reading the file in a year who knows nothing about this change.
@@ -129,7 +149,8 @@ One model call per edit that adds comments, and none otherwise. Each call carrie
 - Docstrings, `{/* */}` and `<!-- -->` are seen only when they take whole lines, open and close inside the edit, and have nothing but whitespace after them on the closing line. One after code on the same line, such as `<p>text</p> <!-- note -->`, is not seen.
 - A docstring, `{/* */}` or `<!-- -->` that the edit adds or changes is judged, rewritten and removed as a whole, including lines the file already had. A rewrite breaks up `"""`, `*/` and `-->` in the model's text, and every `--` in XML, so it cannot end the comment early.
 - Removing a docstring that is the only statement of its function or class would leave an empty body, so that verdict rejects the edit and the agent decides what goes in its place. The body counts as empty when nothing indented under the definition follows the docstring in the edit, even if the file has more.
-- "Added" means lines in the new text that are not in the old text, counted as a multiset, so a moved comment counts as kept.
+- "Added" means lines in the new text that are not in the old text, counted as a multiset, so a moved comment counts as kept. `judge_comments` takes added lines from `git diff` instead, and counts a comment as moved only when the diff removes the same lines in the same file.
+- `judge_comments` needs `git` on the `PATH` and runs in the directory opencode runs in. It is opencode only; the Claude Code hook has no equivalent.
 - The judge is prompted as opencode's `build` agent, so it carries that agent's system prompt, and anything that attributes spend by agent sees `build`. Its session also runs other plugins' chat hooks.
 - Verdicts are not deterministic: the same comment can be worded differently on another run.
 - It relies on opencode behaviour that is not a documented contract: structured output through `format`, tool arguments being mutable in `tool.execute.before`, and the `apply_patch` format.

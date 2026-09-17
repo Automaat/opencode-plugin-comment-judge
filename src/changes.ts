@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 
-import type { Change, Op } from "./types.ts";
+import { blocksOf } from "./comments.ts";
+import type { Block, Change, Op } from "./types.ts";
 
 export const EDIT_TOOLS = new Set(["edit", "write", "multiedit", "apply_patch", "patch"]);
 
@@ -104,4 +105,11 @@ export function changesOf(tool: string, args: any, cwd: string): Change[] {
   }
   if (tool === "apply_patch" || tool === "patch") return patchChanges(args);
   return [];
+}
+
+/**
+ * The comment blocks an edit tool call adds.
+ */
+export function editedBlocks(tool: string, args: any, cwd: string): Block[] {
+  return blocksOf(changesOf(tool, args, cwd));
 }

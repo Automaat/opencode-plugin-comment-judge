@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type ServerResponse } from "node:http";
-import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, it } from "node:test";
 import { pathToFileURL } from "node:url";
 
+import { COMMAND_NAME, TOOL_NAME } from "../../src/branch.ts";
 import { SYSTEM } from "../../src/judge.ts";
 
 const REPO = resolve(import.meta.dirname, "../..");
@@ -25,32 +25,45 @@ const EXPECTED = `export function lineKey(sku: string): string {\n  // ${REWRITE
 
 type Message = { role: string; content?: unknown };
 type ChatRequest = { messages: Message[]; tools?: { function: { name: string } }[]; tool_choice?: unknown };
-type Scenario = { name: string; model: string; tool: string; args: Record<string, string> };
+type Step = { tool: string; args: Record<string, string> };
+type Scenario = { name: string; model: string; steps: Step[] };
 
 const SCENARIOS: Scenario[] = [
   {
     name: "edit",
     model: "fake-model",
-    tool: "edit",
-    args: { filePath: FILE, oldString: "  return sku;", newString: `${STORY}\n${CODE}` },
+    steps: [{ tool: "edit", args: { filePath: FILE, oldString: "  return sku;", newString: `${STORY}\n${CODE}` } }],
   },
   {
     name: "apply_patch",
     model: "gpt-5-fake",
-    tool: "apply_patch",
-    args: {
-      patchText: [
-        "*** Begin Patch",
-        `*** Update File: ${FILE}`,
-        "@@ export function lineKey(sku: string): string {",
-        "-  return sku;",
-        `+${STORY}`,
-        `+${CODE}`,
-        "*** End Patch",
-      ].join("\n"),
-    },
+    steps: [
+      {
+        tool: "apply_patch",
+        args: {
+          patchText: [
+            "*** Begin Patch",
+            `*** Update File: ${FILE}`,
+            "@@ export function lineKey(sku: string): string {",
+            "-  return sku;",
+            `+${STORY}`,
+            `+${CODE}`,
+            "*** End Patch",
+          ].join("\n"),
+        },
+      },
+    ],
   },
 ];
+
+const BRANCH: Scenario = {
+  name: `/${COMMAND_NAME}`,
+  model: "fake-model",
+  steps: [
+    { tool: TOOL_NAME, args: {} },
+    { tool: "edit", args: { filePath: FILE, oldString: STORY, newString: `  // ${REWRITE}` } },
+  ],
+};
 
 const textOf = (content: unknown): string =>
   typeof content === "string"
@@ -94,15 +107,15 @@ async function fakeModel(scenario: Scenario) {
           verdicts: [{ id: "c1", action: "rewrite", reason: "tells the story of the fix", rewrite: REWRITE }],
         });
       }
-      if (!toolNames(request).includes(scenario.tool)) return say(response, "Comment judge contract");
-      if (request.messages.some((message) => message.role === "tool")) return say(response, "Done.");
-      return callTool(response, scenario.tool, scenario.args);
+      if (!toolNames(request).includes(scenario.steps[0]?.tool ?? "")) return say(response, "Comment judge contract");
+      const step = scenario.steps[request.messages.filter((message) => message.role === "tool").length];
+      return step ? callTool(response, step.tool, step.args) : say(response, "Done.");
     });
   });
   await new Promise<void>((listening) => {
     server.listen(0, "127.0.0.1", listening);
   });
-  const { port } = server.address() as AddressInfo;
+  const { port } = server.address() as { port: number };
   return { url: `http://127.0.0.1:${port}/v1`, requests, close: () => server.close() };
 }
 
@@ -213,4 +226,40 @@ describe("against a real opencode", () => {
       }
     });
   }
+  it(`judges a branch's comments through /${COMMAND_NAME} and applies the suggestion without judging it again`, { timeout: TEST_TIMEOUT_MS }, async () => {
+    const root = mkdtempSync(join(tmpdir(), "comment-judge-e2e-"));
+    const model = await fakeModel(BRANCH);
+    try {
+      const env = { ...isolatedEnv(root), GIT_CONFIG_NOSYSTEM: "1" };
+      const directory = project(root, BRANCH, model.url);
+      const git = (...args: string[]) =>
+        execFileSync("git", ["-c", "user.name=e2e", "-c", "user.email=e2e@example.com", "-c", "commit.gpgsign=false", ...args], { cwd: directory, env });
+      git("init", "-q", "-b", "main");
+      git("add", "-A");
+      git("commit", "-q", "-m", "base");
+      git("checkout", "-q", "-b", "story");
+      writeFileSync(join(directory, FILE), BEFORE.replace("  return sku;", `${STORY}\n${CODE}`));
+      git("commit", "-q", "-a", "-m", "story");
+
+      const run = await opencode(["run", "--print-logs", "--command", COMMAND_NAME], directory, env);
+      const context = `opencode exited ${run.code ?? run.signal}\n${run.output}`;
+      assert.equal(run.code, 0, context);
+
+      const judged = model.requests.filter((request) => request.messages.some((message) => textOf(message.content).includes(SYSTEM)));
+      assert.equal(judged.length, 1, context);
+      assert.equal(toolNames(judged[0] as ChatRequest).includes(TOOL_NAME), false, context);
+
+      const results = model.requests.flatMap((request) =>
+        request.messages.filter((message) => message.role === "tool").map((message) => textOf(message.content)),
+      );
+      assert.ok(
+        results.some((result) => result.includes(`${TOOL_NAME}: 1 comment block(s)`) && result.includes(`replace line 2 with:\n\`\`\`\n  // ${REWRITE}\n\`\`\``)),
+        `tool results the agent saw:\n${results.join("\n---\n")}\n${context}`,
+      );
+      assert.equal(readFileSync(join(directory, FILE), "utf8"), EXPECTED, context);
+    } finally {
+      model.close();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });

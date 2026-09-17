@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/Automaat/opencode-plugin-comment-judge/compare/v0.2.0...v0.3.0) (2026-09-17)
+
+
+### Features
+
+* **branch:** judge comments already in a branch ([#25](https://github.com/Automaat/opencode-plugin-comment-judge/issues/25)) ([fa2f546](https://github.com/Automaat/opencode-plugin-comment-judge/commit/fa2f54696c9c243308c4b1b75e453cab5757388a))
+* **claude:** judge comments in Claude Code hooks ([#24](https://github.com/Automaat/opencode-plugin-comment-judge/issues/24)) ([f86bd18](https://github.com/Automaat/opencode-plugin-comment-judge/commit/f86bd185fe19ac70e0d47bac82a9d95f1870c8d7))
+
+
+### Documentation
+
+* **readme:** explain updating and pin versions ([#21](https://github.com/Automaat/opencode-plugin-comment-judge/issues/21)) ([21ad479](https://github.com/Automaat/opencode-plugin-comment-judge/commit/21ad4794503ddba78e879bf7103098a13c70460b))
+
 ## [0.2.0](https://github.com/Automaat/opencode-plugin-comment-judge/compare/v0.1.1...v0.2.0) (2026-09-15)
 
 

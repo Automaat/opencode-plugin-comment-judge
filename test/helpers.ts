@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
-import { devNull, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
 import { blocksOf } from "../src/comments.ts";
@@ -102,7 +102,9 @@ export type Repository = {
  * A scratch git repository on branch main, isolated from the machine's git configuration.
  */
 export function repository(files: Record<string, string> = {}): Repository {
-  process.env.GIT_CONFIG_GLOBAL = devNull;
+  const globalConfig = join(mkdtempSync(join(tmpdir(), "comment-judge-gitconfig-")), "config");
+  writeFileSync(globalConfig, "");
+  process.env.GIT_CONFIG_GLOBAL = globalConfig;
   process.env.GIT_CONFIG_NOSYSTEM = "1";
   const root = mkdtempSync(join(tmpdir(), "comment-judge-git-"));
   const identity = ["-c", "user.name=test", "-c", "user.email=test@example.com", "-c", "commit.gpgsign=false"];

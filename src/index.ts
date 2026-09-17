@@ -48,7 +48,8 @@ export const CommentJudge: Plugin = async ({ client, directory, worktree }, opti
   const track = (session: string) => {
     judges.add(session);
   };
-  const branch = branchJudge({ client, settings: config, rules, track, log, directory });
+  const isJudge = (session: string) => judges.has(session);
+  const branch = branchJudge({ client, settings: config, rules, track, isJudge, log, directory });
 
   return {
     tool: branch.tool,

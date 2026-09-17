@@ -14,7 +14,7 @@ const TOOLS_OFF = Object.fromEntries(
   [
     "bash", "edit", "write", "read", "glob", "grep", "list", "patch",
     "apply_patch", "multiedit", "task", "todowrite", "todoread", "webfetch",
-    "websearch", "codesearch", "skill", "lsp", "question",
+    "websearch", "codesearch", "skill", "lsp", "question", "judge_comments",
   ].map((tool) => [tool, false]),
 );
 

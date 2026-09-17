@@ -168,6 +168,17 @@ describe("judge_comments tool", () => {
     assert.deepEqual(calls.deleted, ["judge-1"]);
   });
 
+  it("is not offered to the judge, and refuses to run inside a judge session", async () => {
+    const { run, hooks, calls, repo } = await judgeBranch(
+      () => verdicts({ id: "c1", action: "keep", reason: "fine" }),
+      { "src/a.ts": "// note\n" },
+    );
+    await run();
+    assert.equal(calls.prompted[0].body.tools[TOOL_NAME], false);
+    await assert.rejects(hooks.tool[TOOL_NAME].execute({}, { ...context(repo.root), sessionID: "judge-1" }), /not available to the comment judge/);
+    assert.equal(calls.created.length, 1);
+  });
+
   it("says when there is nothing to judge, without asking the model", async () => {
     const { run, calls } = await judgeBranch(() => verdicts(), { "src/cart.ts": CART.replace("items.length", "items.length + 0") });
     assert.match(await run(), /^judge_comments: no comments added since [0-9a-f]{12} \(merge base of HEAD and main\) in 1 changed file\(s\)\.$/);

@@ -39,6 +39,7 @@ export type BranchJudgeInput = {
   settings: Settings;
   rules: () => string;
   track: (session: string) => void;
+  isJudge: (session: string) => boolean;
   log: Log;
   directory: string;
 };
@@ -122,10 +123,11 @@ const messageOf = (error: unknown) => (error instanceof Error ? error.message : 
 /**
  * The judge_comments tool, the /judge-comments command, and the filter that keeps the edit hook from judging again the comments the tool suggested.
  */
-export function branchJudge({ client, settings, rules, track, log, directory }: BranchJudgeInput) {
+export function branchJudge({ client, settings, rules, track, isJudge, log, directory }: BranchJudgeInput) {
   const suggested = new Map<string, Set<string>>();
 
   const run = async (args: Args, context: ToolContext): Promise<string> => {
+    if (isJudge(context.sessionID)) throw new Error(`${TOOL_NAME} is not available to the comment judge`);
     const started = Date.now();
     const found = await branchChanges({
       cwd: context.directory || directory,

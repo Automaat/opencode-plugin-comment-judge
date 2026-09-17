@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import { createOpencodeClient, createOpencodeServer, type OpencodeClient } from "@opencode-ai/sdk";
+import type { OpencodeClient } from "@opencode-ai/sdk";
 
 import { blocksOf } from "../src/comments.ts";
 import { judge, type Judgement } from "../src/judge.ts";
@@ -358,12 +358,14 @@ async function main(): Promise<void> {
 
   try {
     try {
+      const { createOpencodeServer } = await import("@opencode-ai/sdk");
       server = await createOpencodeServer({ port: 0, timeout: START_TIMEOUT_MS, signal: controller.signal });
     } catch (error) {
       process.stderr.write(`cannot start opencode: ${error instanceof Error ? error.message : String(error)}\n`);
       process.exitCode = 1;
       return;
     }
+    const { createOpencodeClient } = await import("@opencode-ai/sdk");
     const client = createOpencodeClient({ baseUrl: server.url, directory });
     const unknown = await unknownModels(client, options.models);
     if (unknown.length > 0) {

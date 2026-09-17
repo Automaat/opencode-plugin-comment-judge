@@ -4,7 +4,7 @@
 
 An [opencode](https://opencode.ai) plugin that puts a model between your agent and the comments it writes. Every comment an edit adds is judged: the ones that restate the code or tell the story of the change are removed or rewritten before the file is touched, and the ones that explain something the code cannot say stay.
 
-> **Status:** pre-1.0, verified against opencode 1.18.30. Verdicts, messages and options may change between minor versions.
+> **Status:** pre-1.0. The e2e test runs it inside opencode 1.18.31. Verdicts, messages and options may change between minor versions.
 
 ## Why
 
@@ -38,23 +38,31 @@ The judge answered `rewrite`, because the comment "frames it around the specific
 
 ## Install
 
-Add the plugin to `opencode.json`. opencode installs npm plugins itself when it starts.
+Add the plugin to `opencode.json`, pinned to a version. opencode installs npm plugins itself when it starts. See [Updating](#updating) for why the version is pinned.
+
+<!-- x-release-please-start-version -->
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-plugin-comment-judge"],
+  "plugin": ["opencode-plugin-comment-judge@0.2.0"],
   "small_model": "anthropic/claude-haiku-4-5"
 }
 ```
 
+<!-- x-release-please-end -->
+
 ## Configuration
+
+<!-- x-release-please-start-version -->
 
 ```json
 {
-  "plugin": [["opencode-plugin-comment-judge", { "model": "anthropic/claude-haiku-4-5", "timeoutMs": 20000 }]]
+  "plugin": [["opencode-plugin-comment-judge@0.2.0", { "model": "anthropic/claude-haiku-4-5", "timeoutMs": 20000 }]]
 }
 ```
+
+<!-- x-release-please-end -->
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -65,6 +73,24 @@ Add the plugin to `opencode.json`. opencode installs npm plugins itself when it 
 Diagnostics always go to opencode's own log under the `comment-judge` service.
 
 To read a `log` file as numbers, run `mise run stats -- path/to/log.jsonl` (add `--json` for machine output) from a checkout of this repository: verdict counts and rates, rejections, unjudged edits, judge latency, cost and the most common reasons. The script is not part of the npm package.
+
+## Updating
+
+opencode installs an npm plugin once and keeps using that copy. It installs each entry into its own directory named after the entry, under `~/.cache/opencode/packages/` on macOS and Linux (`$XDG_CACHE_HOME/opencode/packages/` when `XDG_CACHE_HOME` is set), and skips the install whenever that directory already has the package. Nothing refreshes it later.
+
+A bare `"opencode-plugin-comment-judge"` entry resolves `latest` on first install and stays on that version from then on. To update it, remove its cache directory, `opencode-plugin-comment-judge@latest`, and `opencode-plugin-comment-judge` if it exists too, then restart opencode:
+
+```sh
+rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/packages/opencode-plugin-comment-judge@latest" "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/packages/opencode-plugin-comment-judge"
+```
+
+<!-- x-release-please-start-version -->
+
+A pinned entry such as `"opencode-plugin-comment-judge@0.2.0"` gets a directory of its own, so changing the version installs the new one on the next start, and changing it back rolls back. Pinning is the recommended setup: every machine runs the same version, and an update is a one-line change you choose to make.
+
+<!-- x-release-please-end -->
+
+What changed in each version is in the [GitHub releases](https://github.com/Automaat/opencode-plugin-comment-judge/releases) and in [CHANGELOG.md](CHANGELOG.md).
 
 ## What the judge keeps, removes and rewrites
 

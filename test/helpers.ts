@@ -1,3 +1,9 @@
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { devNull, tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+
+import { blocksOf } from "../src/comments.ts";
 import { CommentJudge } from "../src/index.ts";
 import type { Block, Change } from "../src/types.ts";
 
@@ -83,4 +89,42 @@ export function blockOf(raw: string[], file = "a.ts", code = ""): Block {
     text: raw.map((line) => line.trim()).join("\n"),
     context: raw.join("\n"),
   };
+}
+
+export type Repository = {
+  root: string;
+  git: (...args: string[]) => string;
+  write: (files: Record<string, string>) => void;
+  commit: (message: string) => void;
+};
+
+/**
+ * A scratch git repository on branch main, isolated from the machine's git configuration.
+ */
+export function repository(files: Record<string, string> = {}): Repository {
+  process.env.GIT_CONFIG_GLOBAL = devNull;
+  process.env.GIT_CONFIG_NOSYSTEM = "1";
+  const root = mkdtempSync(join(tmpdir(), "comment-judge-git-"));
+  const identity = ["-c", "user.name=test", "-c", "user.email=test@example.com", "-c", "commit.gpgsign=false"];
+  const git = (...args: string[]) => execFileSync("git", [...identity, ...args], { cwd: root, encoding: "utf8" });
+  const write = (entries: Record<string, string>) => {
+    for (const [file, content] of Object.entries(entries)) {
+      mkdirSync(dirname(join(root, file)), { recursive: true });
+      writeFileSync(join(root, file), content);
+    }
+  };
+  git("init", "-q", "-b", "main");
+  write(files);
+  const commit = (message: string) => {
+    git("add", "-A");
+    git("commit", "-q", "--allow-empty", "-m", message);
+  };
+  commit("base");
+  return { root, git, write, commit };
+}
+
+export function comments(changes: Change[]): Record<string, string[]> {
+  const found: Record<string, string[]> = {};
+  for (const block of blocksOf(changes)) found[block.change.file] = [...(found[block.change.file] ?? []), block.raw.join("\n")];
+  return found;
 }

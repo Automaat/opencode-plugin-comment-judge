@@ -1,8 +1,8 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { appendFileSync } from "node:fs";
 
-import { changesOf, EDIT_TOOLS } from "./changes.ts";
-import { blocksOf } from "./comments.ts";
+import { branchJudge } from "./branch.ts";
+import { EDIT_TOOLS, editedBlocks } from "./changes.ts";
 import { fingerprint, flagged } from "./flags.ts";
 import { judge } from "./judge.ts";
 import { appliedDespiteRepeat, onlyRejectedComments, rejection, rewrittenNote } from "./messages.ts";
@@ -45,8 +45,15 @@ export const CommentJudge: Plugin = async ({ client, directory, worktree }, opti
 
   for (const warning of warnings) log("warn", warning);
   const rules = repositoryRules(rulesRoot(worktree, directory), log);
+  const track = (session: string) => {
+    judges.add(session);
+  };
+  const branch = branchJudge({ client, settings: config, rules, track, log, directory });
 
   return {
+    tool: branch.tool,
+    config: branch.config,
+
     "chat.message": async (input, output) => {
       if (judges.has(input.sessionID)) return;
       const text = output.parts
@@ -59,7 +66,7 @@ export const CommentJudge: Plugin = async ({ client, directory, worktree }, opti
     "tool.execute.before": async (input, output) => {
       if (judges.has(input.sessionID) || !EDIT_TOOLS.has(input.tool)) return;
       const started = Date.now();
-      const blocks = blocksOf(changesOf(input.tool, output.args, directory));
+      const blocks = branch.unsuggested(input.sessionID, editedBlocks(input.tool, output.args, directory));
       if (blocks.length === 0) return;
 
       const judgement = await judge(client, config, {
@@ -67,9 +74,7 @@ export const CommentJudge: Plugin = async ({ client, directory, worktree }, opti
         blocks,
         task: tasks.get(input.sessionID) ?? "",
         rules: rules(),
-        track: (session) => {
-          judges.add(session);
-        },
+        track,
       }).catch((error: unknown) => {
         const reason = error instanceof Error ? error.message : String(error);
         log("warn", "judge failed; edit written unjudged", { tool: input.tool, reason, ms: Date.now() - started });

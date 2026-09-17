@@ -58,5 +58,8 @@
     "typecheck": "tsc -p .",
     "test": "node --experimental-strip-types --test --test-force-exit test/*.test.ts",
     "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "zod": "4.1.8"
   }
 }

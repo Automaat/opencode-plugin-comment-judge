@@ -34,15 +34,20 @@ description = "Run the test suite"
 run = "node --experimental-strip-types --test --test-force-exit test/*.test.ts"
 
 [tasks."test:e2e"]
-description = "Run the plugin inside the pinned opencode against a fake model; needs mise run install first"
+description = "Install the pinned opencode from test/e2e and run the plugin inside it against a fake model; needs mise run install first"
 run = [
-  "node node_modules/opencode-ai/postinstall.mjs",
+  "npm ci --prefix test/e2e --ignore-scripts --no-audit --no-fund",
+  "node test/e2e/node_modules/opencode-ai/postinstall.mjs",
   "node --experimental-strip-types --test --test-force-exit test/e2e/*.test.ts",
 ]
 
 [tasks.stats]
 description = "Summarise a judge log: mise run stats -- <log.jsonl> [--json]"
 run = "node --experimental-strip-types scripts/stats.ts"
+
+[tasks.eval]
+description = "Replay eval/cases through the judge on real models: mise run eval -- --model provider/model [--model ...] [--case name] [--runs n] [--json]"
+run = "node --experimental-strip-types scripts/eval.ts"
 
 [tasks.check]
 description = "Run every gate CI runs"

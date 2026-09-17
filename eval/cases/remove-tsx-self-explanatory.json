@@ -1,0 +1,7 @@
+{
+  "file": "src/components/ProfileForm.tsx",
+  "comment": "{/* Save button */}",
+  "context": "      <label>\n        Display name\n        <input name=\"displayName\" defaultValue={profile.displayName} />\n      </label>\n      {/* Save button */}\n      <button type=\"submit\" disabled={saving}>\n        Save\n      </button>\n    </form>",
+  "expected": "remove",
+  "why": "Labels an element whose text already says what it is."
+}

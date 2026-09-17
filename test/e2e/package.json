@@ -1,0 +1,10 @@
+{
+  "name": "opencode-plugin-comment-judge-e2e",
+  "private": true,
+  "description": "The opencode binary the e2e test runs, installed by mise run test:e2e only",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "opencode-ai": "1.18.31"
+  }
+}

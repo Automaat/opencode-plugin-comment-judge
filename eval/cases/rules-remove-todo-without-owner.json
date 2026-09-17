@@ -1,0 +1,8 @@
+{
+  "file": "src/projects/list.ts",
+  "comment": "// TODO: paginate once an account can have more than 1000 projects.",
+  "context": "export async function listProjects(db: Db, accountId: string): Promise<Project[]> {\n  // TODO: paginate once an account can have more than 1000 projects.\n  return db.projects.findMany({ where: { accountId }, take: 1000 });\n}",
+  "rules": "- Remove TODO and FIXME comments that do not name an owner, as in `TODO(alice): ...`.",
+  "expected": "remove",
+  "why": "A concrete TODO the defaults keep, but the repository rules remove it for lacking an owner."
+}

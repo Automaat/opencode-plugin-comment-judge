@@ -1,0 +1,7 @@
+{
+  "file": "src/format/money.ts",
+  "comment": "// ==================== Helpers ====================",
+  "context": "export function formatMoney(cents: number, currency: string): string {\n  return new Intl.NumberFormat(\"en\", { style: \"currency\", currency }).format(cents / 100);\n}\n\n// ==================== Helpers ====================\n\nfunction roundHalfEven(value: number): number {\n  const floor = Math.floor(value);\n  const diff = value - floor;\n  if (diff !== 0.5) return Math.round(value);\n  return floor % 2 === 0 ? floor : floor + 1;\n}",
+  "expected": "remove",
+  "why": "A decorative section banner."
+}

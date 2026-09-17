@@ -1,0 +1,8 @@
+{
+  "file": "api/v1/user.go",
+  "comment": "// Email is the email address of the user.",
+  "context": "type User struct {\n\t// ID is the unique identifier of the user.\n\tID string `json:\"id\"`\n\t// Email is the email address of the user.\n\tEmail string `json:\"email\"`\n}",
+  "rules": "- Keep doc comments on fields of types in `api/`: they become descriptions in the generated OpenAPI schema, even when they restate the field name.",
+  "expected": "keep",
+  "why": "Restates the field name, which the defaults remove, but the repository rules keep it."
+}

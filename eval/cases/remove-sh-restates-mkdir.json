@@ -1,0 +1,7 @@
+{
+  "file": "scripts/build-docs.sh",
+  "comment": "# Create the output directory",
+  "context": "out_dir=\"$repo_root/site\"\n\n# Create the output directory\nmkdir -p \"$out_dir\"\npandoc docs/*.md --standalone --output \"$out_dir/index.html\"",
+  "expected": "remove",
+  "why": "Restates mkdir -p."
+}

@@ -45,6 +45,10 @@ run = [
 description = "Summarise a judge log: mise run stats -- <log.jsonl> [--json]"
 run = "node --experimental-strip-types scripts/stats.ts"
 
+[tasks.eval]
+description = "Replay eval/cases through the judge on real models: mise run eval -- --model provider/model [--model ...] [--case name] [--runs n] [--json]"
+run = "node --experimental-strip-types scripts/eval.ts"
+
 [tasks.check]
 description = "Run every gate CI runs"
 depends = ["typecheck", "lint:js", "lint:md", "lint:actions", "test", "build"]

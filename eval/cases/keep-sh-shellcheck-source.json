@@ -1,0 +1,8 @@
+{
+  "file": "scripts/rotate-backups.sh",
+  "comment": "# shellcheck source=lib/log.sh",
+  "context": "#!/usr/bin/env bash\nset -euo pipefail\n\nhere=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n# shellcheck source=lib/log.sh\nsource \"$here/lib/log.sh\"\n\nlog_info \"rotating backups in $BACKUP_DIR\"\nfind \"$BACKUP_DIR\" -name '*.tar.zst' -mtime +14 -delete",
+  "task": "Make rotate-backups.sh use the shared logging helpers from lib/log.sh.",
+  "expected": "keep",
+  "why": "A shellcheck directive telling the linter where a dynamic source path points."
+}

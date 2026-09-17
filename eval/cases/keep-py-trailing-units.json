@@ -1,0 +1,7 @@
+{
+  "file": "clients/billing.py",
+  "comment": "# seconds; the load balancer drops idle connections after 6",
+  "context": "def make_session() -> requests.Session:\n    session = requests.Session()\n    adapter = HTTPAdapter(\n        pool_connections=4,\n        pool_maxsize=16,\n    )\n    session.mount(\"https://\", adapter)\n    session.keep_alive_timeout = 5.0  # seconds; the load balancer drops idle connections after 6\n    return session",
+  "expected": "keep",
+  "why": "Unit and the constraint that picks the number."
+}

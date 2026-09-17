@@ -1,0 +1,7 @@
+{
+  "file": "docs/setup.md",
+  "comment": "<!-- ======== Installation section ======== -->",
+  "context": "Tern is a small job queue for Go services.\n\n<!-- ======== Installation section ======== -->\n\n## Installation\n\n```sh\ngo get example.com/tern\n```",
+  "expected": "remove",
+  "why": "A banner repeating the heading under it."
+}

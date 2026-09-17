@@ -136,7 +136,7 @@ One model call per edit that adds comments, and none otherwise. Each call carrie
 
 ## Reporting a wrong verdict
 
-Open an issue with the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) template: the comment, the code around it, what the judge did and what it should have done. These reports become the cases the instructions are tuned against.
+Open an issue with the [wrong verdict](https://github.com/Automaat/opencode-plugin-comment-judge/issues/new?template=wrong-verdict.yml) template: the comment, the code around it, what the judge did and what it should have done. These reports become cases in [`eval/cases/`](eval/cases), which `mise run eval` replays against real models before the instructions change; see [CONTRIBUTING.md](CONTRIBUTING.md#replaying-the-eval-cases).
 
 ## Trying a working copy
 

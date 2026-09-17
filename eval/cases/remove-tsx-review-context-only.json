@@ -1,0 +1,7 @@
+{
+  "file": "src/pages/Invoices.tsx",
+  "comment": "{/* Added per review feedback */}",
+  "context": "  if (invoices.length === 0) {\n    return (\n      <>\n        {/* Added per review feedback */}\n        <EmptyState title=\"No invoices yet\" action={<NewInvoiceButton />} />\n      </>\n    );\n  }",
+  "expected": "remove",
+  "why": "Only says where the change came from; nothing lasting to keep."
+}

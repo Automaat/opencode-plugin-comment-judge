@@ -1,0 +1,7 @@
+{
+  "file": "scripts/sync-assets.sh",
+  "comment": "# This part was a bit tricky and we tried a few different approaches before\n# this one worked. The important thing is that rsync needs the trailing slash\n# on the source, otherwise it copies the directory itself into the destination\n# instead of its contents. After that we just print a message.",
+  "context": "src=\"$1\"\ndest=\"$2\"\n\n# This part was a bit tricky and we tried a few different approaches before\n# this one worked. The important thing is that rsync needs the trailing slash\n# on the source, otherwise it copies the directory itself into the destination\n# instead of its contents. After that we just print a message.\nrsync -a --delete \"$src/\" \"$dest\"\necho \"synced $src to $dest\"",
+  "expected": "rewrite",
+  "why": "One useful point buried in four lines of narration."
+}

@@ -40,6 +40,8 @@ The judge answered `rewrite`, because the comment "frames it around the specific
 
 Add the plugin to `opencode.json`, pinned to a version. opencode installs npm plugins itself when it starts. See [Updating](#updating) for why the version is pinned.
 
+<!-- x-release-please-start-version -->
+
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
@@ -48,13 +50,19 @@ Add the plugin to `opencode.json`, pinned to a version. opencode installs npm pl
 }
 ```
 
+<!-- x-release-please-end -->
+
 ## Configuration
+
+<!-- x-release-please-start-version -->
 
 ```json
 {
   "plugin": [["opencode-plugin-comment-judge@0.2.0", { "model": "anthropic/claude-haiku-4-5", "timeoutMs": 20000 }]]
 }
 ```
+
+<!-- x-release-please-end -->
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -76,7 +84,11 @@ A bare `"opencode-plugin-comment-judge"` entry resolves `latest` on first instal
 rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/packages/opencode-plugin-comment-judge@latest" "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/packages/opencode-plugin-comment-judge"
 ```
 
+<!-- x-release-please-start-version -->
+
 A pinned entry such as `"opencode-plugin-comment-judge@0.2.0"` gets a directory of its own, so changing the version installs the new one on the next start, and changing it back rolls back. Pinning is the recommended setup: every machine runs the same version, and an update is a one-line change you choose to make.
+
+<!-- x-release-please-end -->
 
 What changed in each version is in the [GitHub releases](https://github.com/Automaat/opencode-plugin-comment-judge/releases) and in [CHANGELOG.md](CHANGELOG.md).
 
